@@ -18,6 +18,55 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
+import datetime
+
+
+def init_article_files(slug, workspace_path):
+    """Initialise work-log.md and writer-notes.md for a new article."""
+    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+
+    work_log_path = workspace_path / "work-log.md"
+    if not work_log_path.exists():
+        work_log_path.write_text(
+            f"# Work Log — {slug}\n"
+            "*Append-only. Written by every skill step and the orchestrator. Never edited — only added to.*\n"
+            "*Read by: human editor at any gate, revision skill before final pass.*\n\n"
+            f"---\nstep: init | {timestamp} | status: complete\n---\n"
+            f"Workspace created for {slug}. work-log.md and writer-notes.md initialised.\n\n"
+        )
+
+    writer_notes_path = workspace_path / "writer-notes.md"
+    if not writer_notes_path.exists():
+        writer_notes_path.write_text(
+            f"# Writer Notes — {slug}\n"
+            "*Append-only. Written on instinct — not on a schedule. Short, unpolished, honest.*\n"
+            "*Written by: writing skill, audit skill, human editor (at revision gate).*\n"
+            "*Read by: revision skill before final pass. Human editor after the run for system improvement.*\n\n"
+            "---\n\n"
+        )
+
+
+def log_step_start(slug, workspace_path, step_name):
+    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+    entry = (
+        f"---\nstep: {step_name} | {timestamp} | status: running\n---\n"
+        f"Orchestrator started {step_name} step.\n\n"
+    )
+    with open(workspace_path / "work-log.md", "a") as f:
+        f.write(entry)
+
+
+def log_step_end(slug, workspace_path, step_name, status, note=""):
+    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+    note_line = f"\n{note}" if note else ""
+    entry = (
+        f"---\nstep: {step_name} | {timestamp} | status: {status}\n---\n"
+        f"Orchestrator completed {step_name} step.{note_line}\n\n"
+    )
+    with open(workspace_path / "work-log.md", "a") as f:
+        f.write(entry)
+
+
 # ---------------------------------------------------------------------------
 # Configuration
 # ---------------------------------------------------------------------------
@@ -36,7 +85,7 @@ STEPS = [
 ]
 
 # Steps where the orchestrator pauses and waits for human input before continuing
-HUMAN_GATES = {"angle", "headline", "revision"}
+HUMAN_GATES = {"angle", "headline", "research", "revision"}
 
 WORKSPACE_BASE = Path("workspace/article")
 SCRIPTS_DIR = Path("scripts")
@@ -247,7 +296,7 @@ def step_audit(article: str):
 
 
 def step_revision(article: str):
-    return run_claude_skill("audit.md", article)
+    return run_claude_skill("revision.md", article)
 
 
 def step_links(article: str):
