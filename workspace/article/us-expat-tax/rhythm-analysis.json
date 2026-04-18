@@ -1,0 +1,20 @@
+{
+  "sentence_count": 3,
+  "mean_length": 10.3,
+  "min_length": 6,
+  "max_length": 19,
+  "burstiness_score": 0.593,
+  "em_dash_count": 0,
+  "distribution": {
+    "1_to_10": 2,
+    "11_to_20": 1,
+    "21_to_30": 0,
+    "31_plus": 0
+  },
+  "uniform_runs": [],
+  "flags": {
+    "low_burstiness": false,
+    "em_dash_overuse": false,
+    "no_short_sentences": false
+  }
+}
