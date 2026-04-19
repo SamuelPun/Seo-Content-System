@@ -4,10 +4,10 @@ run_workflow.py — SEO Content System Orchestrator
 Chains all scripts and Claude Code sessions together for a single article.
 
 Usage:
-    python3 run_workflow.py --article "us-expat-tax" --step all
-    python3 run_workflow.py --article "us-expat-tax" --step keyword
-    python3 run_workflow.py --article "us-expat-tax" --from headline-outline
-    python3 run_workflow.py --article "us-expat-tax" --step audit --force
+    python3 run_workflow.py --client monx --article "us-expat-tax" --step all
+    python3 run_workflow.py --client monx --article "us-expat-tax" --step keyword
+    python3 run_workflow.py --client monx --article "us-expat-tax" --from headline-outline
+    python3 run_workflow.py --client monx --article "us-expat-tax" --step audit --force
 """
 
 import argparse
@@ -18,6 +18,12 @@ import subprocess
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
+
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
 
 
 def normalise_slug(name: str) -> str:
@@ -75,7 +81,7 @@ def log_step_end(slug, workspace_path, step_name, status, note=""):
 
 
 # ---------------------------------------------------------------------------
-# Configuration
+# Configuration (paths resolved in main() once --client is known)
 # ---------------------------------------------------------------------------
 
 STEPS = [
@@ -93,10 +99,13 @@ STEPS = [
 # Steps where the orchestrator pauses and waits for human input before continuing
 HUMAN_GATES = {"angle", "headline-outline", "research", "revision"}
 
-WORKSPACE_BASE = Path("workspace/article")
-SCRIPTS_DIR = Path("scripts")
-SKILLS_DIR = Path("skills")
-BRAND_DIR = Path("brand")
+SCRIPTS_DIR = Path(__file__).parent / "scripts"
+SKILLS_DIR  = Path(__file__).parent / "skills"
+
+# Set in main() once --client is resolved
+CONTENT_DIR: Path = None
+BRAND_DIR:   Path = None
+CLIENT_SITEMAP_URL: str = None
 
 
 # ---------------------------------------------------------------------------
@@ -104,7 +113,7 @@ BRAND_DIR = Path("brand")
 # ---------------------------------------------------------------------------
 
 def workspace(article: str) -> Path:
-    return WORKSPACE_BASE / article
+    return CONTENT_DIR / article
 
 
 def log_path(article: str) -> Path:
@@ -144,6 +153,31 @@ def is_complete(article: str, step: str) -> bool:
     return log.get("steps", {}).get(step, {}).get("status") == "complete"
 
 
+def update_content_index():
+    """Regenerate _index.md in CONTENT_DIR from all article log.json files."""
+    rows = []
+    for article_dir in sorted(CONTENT_DIR.iterdir()):
+        if not article_dir.is_dir() or article_dir.name.startswith("_"):
+            continue
+        log_file = article_dir / "log.json"
+        if not log_file.exists():
+            continue
+        try:
+            data = json.loads(log_file.read_text(encoding="utf-8"))
+        except Exception:
+            continue
+        keyword = data.get("display_name", article_dir.name)
+        steps = data.get("steps", {})
+        completed = [s for s in STEPS if steps.get(s, {}).get("status") == "complete"]
+        status = completed[-1] if completed else "pending"
+        last_edit = datetime.fromtimestamp(log_file.stat().st_mtime).strftime("%Y-%m-%d")
+        rows.append(f"| {keyword} | {status} | {last_edit} |")
+
+    header = "| Keyword | Status | Last edited |\n|---|---|---|\n"
+    index_path = CONTENT_DIR / "_index.md"
+    index_path.write_text(header + "\n".join(rows) + "\n", encoding="utf-8")
+
+
 def print_status(msg: str, kind: str = "info"):
     icons = {"info": "→", "ok": "✓", "skip": "·", "gate": "⏸", "error": "✗"}
     print(f"  {icons.get(kind, '→')} {msg}")
@@ -163,8 +197,9 @@ def run_script(script_name: str, args: list[str]) -> bool:
 def run_claude_skill(skill_file: str, article: str, seed: str = None) -> bool:
     """
     Launch a Claude Code session with the given skill file.
-    Optional seed is injected before the skill content so Claude can
-    build on the editor's idea rather than starting from scratch.
+    WORKSPACE and BRAND_DIR are injected into the prompt header so skills
+    can resolve both article files and brand files by absolute path.
+    Optional seed is prepended so Claude builds on the editor's idea.
     Returns True on success.
     """
     skill_path = SKILLS_DIR / skill_file
@@ -176,15 +211,20 @@ def run_claude_skill(skill_file: str, article: str, seed: str = None) -> bool:
 
     skill_content = skill_path.read_text()
 
+    header = (
+        f"WORKSPACE: {ws.resolve()}\n"
+        f"BRAND_DIR: {BRAND_DIR.resolve()}\n"
+    )
+
     if seed:
         prompt = (
-            f"WORKSPACE: {ws.resolve()}\n\n"
+            f"{header}\n"
             f"EDITOR SEED — use this as your starting point, verify and build on it "
             f"using the SERP data and inputs: {seed}\n\n"
             f"{skill_content}"
         )
     else:
-        prompt = f"WORKSPACE: {ws.resolve()}\n\n{skill_content}"
+        prompt = f"{header}\n{skill_content}"
 
     print_status(f"Launching Claude Code — skill: {skill_file}")
     result = subprocess.run(
@@ -236,7 +276,6 @@ def _write_chosen_headline(headline_path: Path, outline_path: Path, chosen: str)
             elif line.strip() == "## Chosen headline":
                 new_lines.append(line)
                 new_lines.append(chosen)
-                # skip the next line if it's a placeholder
                 continue
             else:
                 new_lines.append(line)
@@ -370,11 +409,9 @@ def step_keyword(article: str):
     kw = get_keyword(article)
 
     serp_out = ws / "serp-urls.json"
-    paa_out = ws / "paa.json"
     serp_pages_dir = ws / "serp-pages"
     serp_pages_dir.mkdir(parents=True, exist_ok=True)
 
-    # 1. Fetch SERP data from Ahrefs
     ok = run_script("fetch_serp.py", [
         "--keyword", kw,
         "--out-dir", str(ws)
@@ -382,7 +419,6 @@ def step_keyword(article: str):
     if not ok:
         return False
 
-    # 2. Fetch each SERP URL → clean markdown
     if not serp_out.exists():
         print_status("serp-urls.json not found — cannot fetch SERP pages", "error")
         return False
@@ -410,7 +446,12 @@ def step_headline_outline(article: str):
     ws = workspace(article)
     print()
     seed = input("  Your headline idea (Enter for Claude's options): ").strip()
-    ok = run_script("fetch_sitemap.py", ["--out-dir", str(ws)])
+
+    sitemap_args = ["--out-dir", str(ws)]
+    if CLIENT_SITEMAP_URL:
+        sitemap_args += ["--sitemap-url", CLIENT_SITEMAP_URL]
+
+    ok = run_script("fetch_sitemap.py", sitemap_args)
     if not ok:
         print_status("fetch_sitemap failed — sitemap-candidates.json will be missing; links step will fail", "error")
         return False
@@ -457,7 +498,6 @@ def step_audit(article: str):
         print_status("draft.md not found — run 'writing' step first", "error")
         return False
 
-    # Run both analysis scripts against the draft
     ok = run_script("scan_banned_phrases.py", [
         "--draft", str(draft),
         "--out-dir", str(ws)
@@ -474,7 +514,6 @@ def step_audit(article: str):
         print_status("analyse_rhythm failed — rhythm-analysis.json not created", "error")
         return False
 
-    # Claude Code session to revise based on audit output
     return run_claude_skill("audit.md", article)
 
 
@@ -514,7 +553,6 @@ def step_output(article: str):
     if not ok:
         return False
 
-    # Generate meta, schema, then assemble HTML
     ok = run_script("validate_meta.py", [
         "--draft", str(draft),
         "--out-dir", str(ws)
@@ -555,8 +593,24 @@ STEP_RUNNERS = {
 # Main
 # ---------------------------------------------------------------------------
 
+def load_client_profile(client_dir: Path) -> dict:
+    """Parse profile.md and return a dict with known fields."""
+    profile_path = client_dir / "profile.md"
+    if not profile_path.exists():
+        return {}
+    text = profile_path.read_text(encoding="utf-8")
+    data = {}
+    m = re.search(r'\*\*Sitemap index:\*\*\s*(\S+)', text)
+    if m:
+        data["sitemap_url"] = m.group(1).strip()
+    return data
+
+
 def main():
+    global CONTENT_DIR, BRAND_DIR, CLIENT_SITEMAP_URL
+
     parser = argparse.ArgumentParser(description="SEO Content System Orchestrator")
+    parser.add_argument("--client",  required=True, help="Client slug (e.g. monx)")
     parser.add_argument("--article", required=True, help="Article slug (e.g. us-expat-tax)")
     parser.add_argument("--step",    default="all",  help="Single step to run, or 'all'")
     parser.add_argument("--from",    dest="from_step", default=None,
@@ -564,6 +618,30 @@ def main():
     parser.add_argument("--force",   action="store_true",
                         help="Re-run step even if already marked complete")
     args = parser.parse_args()
+
+    # Resolve client paths
+    content_base_env = os.environ.get("CONTENT_BASE", "").strip()
+    if not content_base_env:
+        print("ERROR: CONTENT_BASE is not set. Add it to .env or export it before running.")
+        sys.exit(1)
+
+    content_base = Path(content_base_env)
+    client_dir = content_base / args.client
+
+    if not client_dir.exists():
+        print(f"ERROR: Client folder not found: {client_dir}")
+        print(f"       Run onboard_client.py --client {args.client} to create it.")
+        sys.exit(1)
+
+    CONTENT_DIR = client_dir / "content"
+    BRAND_DIR   = client_dir / "brand"
+    CONTENT_DIR.mkdir(parents=True, exist_ok=True)
+
+    if not BRAND_DIR.exists():
+        print(f"WARNING: Brand folder not found at {BRAND_DIR} — skills will not find brand files")
+
+    profile = load_client_profile(client_dir)
+    CLIENT_SITEMAP_URL = profile.get("sitemap_url")
 
     display_name = args.article
     article = normalise_slug(display_name)
@@ -594,8 +672,8 @@ def main():
         steps_to_run = [args.step]
 
     print()
-    print(f"  SEO Content System — {display_name}  [{article}]")
-    print(f"  {'─' * 40}")
+    print(f"  SEO Content System — {args.client} / {display_name}  [{article}]")
+    print(f"  {'─' * 50}")
     print()
 
     for step in steps_to_run:
@@ -617,6 +695,7 @@ def main():
 
         mark_complete(article, step)
         log_step_end(article, ws, step, "complete")
+        update_content_index()
         print_status(f"{step} — done", "ok")
 
         # Interactive gate — pause before continuing to next step

@@ -89,11 +89,12 @@ def parse_child_sitemap(url: str) -> list:
 # Main
 # ---------------------------------------------------------------------------
 
-def run(out_dir: Path, types: list) -> bool:
+def run(out_dir: Path, types: list, sitemap_url: str = None) -> bool:
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    print(f"[INFO] Fetching sitemap index: {SITEMAP_INDEX}")
-    child_urls = get_child_sitemaps(SITEMAP_INDEX, types)
+    index_url = sitemap_url or SITEMAP_INDEX
+    print(f"[INFO] Fetching sitemap index: {index_url}")
+    child_urls = get_child_sitemaps(index_url, types)
 
     if not child_urls:
         print(f"ERROR: No child sitemaps found for types: {types}", file=sys.stderr)
@@ -132,6 +133,8 @@ def parse_args():
         epilog=__doc__,
     )
     parser.add_argument("--out-dir", required=True, help="Article workspace directory.")
+    parser.add_argument("--sitemap-url", default=None,
+                        help="Override the default sitemap index URL.")
     parser.add_argument("--types", nargs="+", default=DEFAULT_TYPES,
                         help="Sitemap types to include (default: post page).")
     return parser.parse_args()
@@ -139,7 +142,7 @@ def parse_args():
 
 def main():
     args = parse_args()
-    ok = run(Path(args.out_dir), args.types)
+    ok = run(Path(args.out_dir), args.types, sitemap_url=args.sitemap_url)
     sys.exit(0 if ok else 1)
 
 

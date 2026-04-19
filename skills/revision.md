@@ -43,16 +43,16 @@ This is a different job from the audit step. The audit fixed mechanical issues. 
 
 ## Inputs — read all of these
 
-Article files are in the WORKSPACE path provided at the top of this prompt. `brand/` files are at the project root.
+Article files are in the WORKSPACE path provided at the top of this prompt. Brand files are in the BRAND_DIR path provided at the top of this prompt.
 
 | File | What it contains |
 |---|---|
-| `draft.md` | The audited draft — may include human edits since the audit step |
-| `outline.md` | The approved outline — check the final draft still honours the structure and intent |
-| `angle.md` | The approved angle — the editorial test everything is measured against |
-| `brand/brand-voice-card.md` | Brand voice — final check that voice is consistent throughout |
-| `sources/index.json` | Research index — verify all claims in the draft are supported |
-| `keyword.json` | Target keyword and PAA questions — final SEO check |
+| `{WORKSPACE}/draft.md` | The audited draft — may include human edits since the audit step |
+| `{WORKSPACE}/outline.md` | The approved outline — check the final draft still honours the structure and intent |
+| `{WORKSPACE}/angle.md` | The approved angle — the editorial test everything is measured against |
+| `{BRAND_DIR}/brand-voice-card.md` | Brand voice — final check that voice is consistent throughout |
+| `{WORKSPACE}/sources/index.json` | Research index — verify all claims in the draft are supported |
+| `{WORKSPACE}/keyword.json` | Target keyword and PAA questions — final SEO check |
 
 ---
 

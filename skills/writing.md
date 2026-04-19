@@ -13,18 +13,18 @@ You do not plan. You do not summarise what you are about to write. You write.
 
 ## Inputs — read all of these before writing a single word
 
-Article files are in the WORKSPACE path provided at the top of this prompt. `brand/` and `skills/` files are at the project root.
+Article files are in the WORKSPACE path provided at the top of this prompt. Brand files are in the BRAND_DIR path provided at the top of this prompt.
 
 | File | What it contains |
 |---|---|
-| `outline.md` | Your section-by-section brief — follow this structure exactly |
-| `angle.md` | The editorial position — every paragraph must serve this angle |
-| `sources/index.json` | Research index — which sources support which sections |
-| `sources/[slug].md` | Individual source files — read before writing the section that uses each one |
-| `brand/brand-voice-card.md` | Brand voice — tone, vocabulary, sentence patterns to use and avoid |
-| `brand/de-ai-guidelines.md` | De-AI rules — patterns to avoid so the writing sounds human |
-| `keyword.json` | Target keyword and PAA questions |
-| `skills/content-devices.md` | Device library — read any device listed in the outline before writing that section |
+| `{WORKSPACE}/outline.md` | Your section-by-section brief — follow this structure exactly |
+| `{WORKSPACE}/angle.md` | The editorial position — every paragraph must serve this angle |
+| `{WORKSPACE}/sources/index.json` | Research index — which sources support which sections |
+| `{WORKSPACE}/sources/[slug].md` | Individual source files — read before writing the section that uses each one |
+| `{BRAND_DIR}/brand-voice-card.md` | Brand voice — tone, vocabulary, sentence patterns to use and avoid |
+| `{BRAND_DIR}/de-ai-guidelines.md` | De-AI rules — patterns to avoid so the writing sounds human |
+| `{WORKSPACE}/keyword.json` | Target keyword and PAA questions |
+| `{SKILLS_DIR}/content-devices.md` | Device library — read any device listed in the outline before writing that section |
 | `skills/content-standards.md` | Structural standards — word count, sentence length, paragraph length, headings, links, CTA rules |
 
 Do not begin writing until you have read all of the above.

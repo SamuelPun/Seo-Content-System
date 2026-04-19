@@ -125,8 +125,8 @@ Reading level is determined per article based on the target reader defined in `a
 
 ## What These Standards Do Not Cover
 
-- Tone, personality, vocabulary preferences → `brand/brand-voice-card.md`
-- Banned AI phrases and patterns → `brand/de-ai-guidelines.md`
+- Tone, personality, vocabulary preferences → `{BRAND_DIR}/brand-voice-card.md`
+- Banned AI phrases and patterns → `{BRAND_DIR}/de-ai-guidelines.md`
 - SEO keyword placement and PAA coverage → `writing.md` writing rules
 - Content device execution → `skills/content-devices.md`
 - Schema, meta, and HTML output → `skills/output.md`

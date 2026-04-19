@@ -27,17 +27,17 @@ You edit surgically. You do not rewrite sections from scratch. You do not improv
 
 ## Inputs — read all of these before touching the draft
 
-Article files are in the WORKSPACE path provided at the top of this prompt. `brand/` and `skills/` files are at the project root.
+Article files are in the WORKSPACE path provided at the top of this prompt. Brand files are in the BRAND_DIR path provided at the top of this prompt.
 
 | File | What it contains |
 |---|---|
-| `draft.md` | The article draft to audit and revise |
-| `audit-flags.json` | Output of `scan_banned_phrases.py` — exact locations of HIGH and MEDIUM severity flags |
-| `rhythm-analysis.json` | Output of `analyse_rhythm.py` — burstiness score, em dash count, sentence length data |
-| `brand/de-ai-guidelines.md` | Full de-AI rules — your editing standard |
-| `brand/brand-voice-card.md` | Brand voice — ensure revisions stay on-voice |
-| `angle.md` | The approved angle — ensure revisions don't drift from it |
-| `skills/content-standards.md` | Structural standards — check introduction, paragraph length, sentence cap, CTA |
+| `{WORKSPACE}/draft.md` | The article draft to audit and revise |
+| `{WORKSPACE}/audit-flags.json` | Output of `scan_banned_phrases.py` — exact locations of HIGH and MEDIUM severity flags |
+| `{WORKSPACE}/rhythm-analysis.json` | Output of `analyse_rhythm.py` — burstiness score, em dash count, sentence length data |
+| `{BRAND_DIR}/de-ai-guidelines.md` | Full de-AI rules — your editing standard |
+| `{BRAND_DIR}/brand-voice-card.md` | Brand voice — ensure revisions stay on-voice |
+| `{WORKSPACE}/angle.md` | The approved angle — ensure revisions don't drift from it |
+| `{SKILLS_DIR}/content-standards.md` | Structural standards — check introduction, paragraph length, sentence cap, CTA |
 
 ---
 
