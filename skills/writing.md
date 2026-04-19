@@ -13,7 +13,7 @@ You do not plan. You do not summarise what you are about to write. You write.
 
 ## Inputs — read all of these before writing a single word
 
-All files are in the WORKSPACE path provided at the top of this prompt.
+Article files are in the WORKSPACE path provided at the top of this prompt. `brand/` and `skills/` files are at the project root.
 
 | File | What it contains |
 |---|---|

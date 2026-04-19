@@ -51,15 +51,20 @@ def run(draft_path, out_dir):
     uniform_runs = []
     run_start = 0
     for i in range(1, len(lengths)):
-        if abs(lengths[i] - lengths[i-1]) <= 5:
-            if i - run_start >= 2:
+        if abs(lengths[i] - lengths[i-1]) > 5:
+            if i - run_start >= 3:
                 uniform_runs.append({
                     "start_sentence": run_start + 1,
-                    "end_sentence":   i + 1,
-                    "lengths":        lengths[run_start:i+1],
+                    "end_sentence":   i,
+                    "lengths":        lengths[run_start:i],
                 })
-        else:
             run_start = i
+    if len(lengths) - run_start >= 3:
+        uniform_runs.append({
+            "start_sentence": run_start + 1,
+            "end_sentence":   len(lengths),
+            "lengths":        lengths[run_start:],
+        })
 
     # Distribution buckets
     distribution = {
@@ -96,7 +101,7 @@ def run(draft_path, out_dir):
     print(f"  Em dashes:      {result['em_dash_count']}  {'⚠ OVERUSE' if result['flags']['em_dash_overuse'] else '✓ OK'}")
     print(f"  Short sentences (≤10w): {distribution['1_to_10']}  {'⚠ NONE — add short sentences' if result['flags']['no_short_sentences'] else '✓ OK'}")
     if uniform_runs:
-        print(f"  Uniform runs:   {len(uniform_runs)} sequence(s) of similar-length sentences")
+        print(f"  Uniform runs:   {len(result['uniform_runs'])} sequence(s) of similar-length sentences")
     return True
 
 

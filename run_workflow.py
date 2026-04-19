@@ -18,12 +18,11 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-import datetime
 
 
 def init_article_files(slug, workspace_path):
     """Initialise work-log.md and writer-notes.md for a new article."""
-    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
 
     work_log_path = workspace_path / "work-log.md"
     if not work_log_path.exists():
@@ -47,7 +46,7 @@ def init_article_files(slug, workspace_path):
 
 
 def log_step_start(slug, workspace_path, step_name):
-    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
     entry = (
         f"---\nstep: {step_name} | {timestamp} | status: running\n---\n"
         f"Orchestrator started {step_name} step.\n\n"
@@ -57,7 +56,7 @@ def log_step_start(slug, workspace_path, step_name):
 
 
 def log_step_end(slug, workspace_path, step_name, status, note=""):
-    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
     note_line = f"\n{note}" if note else ""
     entry = (
         f"---\nstep: {step_name} | {timestamp} | status: {status}\n---\n"
@@ -284,11 +283,11 @@ def step_audit(article: str):
     # Run both analysis scripts against the draft
     run_script("scan_banned_phrases.py", [
         "--draft", str(draft),
-        "--out", str(ws / "audit-flags.json")
+        "--out-dir", str(ws)
     ])
     run_script("analyse_rhythm.py", [
         "--draft", str(draft),
-        "--out", str(ws / "rhythm-analysis.json")
+        "--out-dir", str(ws)
     ])
 
     # Claude Code session to revise based on audit output
@@ -310,8 +309,8 @@ def step_links(article: str):
 
     return run_script("match_internal_links.py", [
         "--draft", str(draft),
-        "--sitemap", str(sitemap),
-        "--out", str(ws / "internal-link-candidates.json")
+        "--candidates", str(sitemap),
+        "--out-dir", str(ws)
     ])
 
 
@@ -323,18 +322,21 @@ def step_output(article: str):
         print_status("draft.md not found", "error")
         return False
 
+    ok = run_claude_skill("output.md", article)
+    if not ok:
+        return False
+
     # Generate meta, schema, then assemble HTML
     run_script("validate_meta.py", [
         "--draft", str(draft),
-        "--out", str(ws / "meta.json")
+        "--out-dir", str(ws)
     ])
     run_script("generate_schema.py", [
         "--draft", str(draft),
-        "--out", str(ws / "schema.json")
+        "--out-dir", str(ws)
     ])
     run_script("build_output.py", [
-        "--workspace", str(ws),
-        "--out", str(ws / "final.html")
+        "--workspace", str(ws)
     ])
     return True
 
@@ -375,11 +377,12 @@ def main():
     ws = workspace(article)
     ws.mkdir(parents=True, exist_ok=True)
 
-    # Initialise log if new article
+    # Initialise log and workspace files if new article
     log = load_log(article)
     if not log.get("steps"):
         log["steps"] = {s: {"status": "pending"} for s in STEPS}
         save_log(article, log)
+    init_article_files(article, ws)
 
     # Determine which steps to run
     if args.step == "all" or args.from_step:

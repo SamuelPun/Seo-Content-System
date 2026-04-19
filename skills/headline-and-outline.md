@@ -13,7 +13,7 @@ You do not write the article. You produce `headline.md` and `outline.md`.
 
 ## Inputs — read all of these before writing anything
 
-All files are in the WORKSPACE path provided at the top of this prompt.
+Article files are in the WORKSPACE path provided at the top of this prompt. `skills/` files are at the project root.
 
 | File | What it contains |
 |---|---|

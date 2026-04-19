@@ -27,7 +27,7 @@ You edit surgically. You do not rewrite sections from scratch. You do not improv
 
 ## Inputs — read all of these before touching the draft
 
-All files are in the WORKSPACE path provided at the top of this prompt.
+Article files are in the WORKSPACE path provided at the top of this prompt. `brand/` and `skills/` files are at the project root.
 
 | File | What it contains |
 |---|---|
@@ -52,9 +52,8 @@ All files are in the WORKSPACE path provided at the top of this prompt.
 Key metrics to check:
 - `burstiness_score` — target is above 1.2. Below 1.0 means the writing is too uniform.
 - `em_dash_count` — flag if above 4 in a single article
-- `avg_sentence_length` — flag if above 22 words
-- `sentence_length_variance` — low variance = robotic rhythm, needs fixing
-- `consecutive_similar_length` — runs of 3+ same-length sentences need breaking up
+- `mean_length` — flag if above 22 words
+- `uniform_runs` — runs of 3+ same-length sentences need breaking up
 
 ---
 

@@ -43,7 +43,7 @@ This is a different job from the audit step. The audit fixed mechanical issues. 
 
 ## Inputs — read all of these
 
-All files are in the WORKSPACE path provided at the top of this prompt.
+Article files are in the WORKSPACE path provided at the top of this prompt. `brand/` files are at the project root.
 
 | File | What it contains |
 |---|---|

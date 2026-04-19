@@ -36,7 +36,7 @@ def run(draft_path, out_dir, title=None, description=None, url=None):
         title = extract_title(text) or ""
     if not description:
         first_para = extract_first_paragraph(text) or ""
-        description = first_para[:DESC_MAX]
+        description = first_para
 
     title_len = len(title)
     desc_len  = len(description)
