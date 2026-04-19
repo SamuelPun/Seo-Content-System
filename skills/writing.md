@@ -132,7 +132,7 @@ delve, tapestry, nuance/nuanced, foster, robust, leverage (as a verb), utilize, 
 **Rhythm — aim for:**
 - Sentence length variation: mix short punchy sentences with longer ones
 - Occasional one-sentence paragraphs for emphasis
-- Em dashes used sparingly — only when they genuinely clarify
+- No em dashes. They are an AI writing tell and will be flagged HIGH in the audit scan. Use a comma, semicolon, colon, or parentheses instead.
 - Burstiness score above 1.2 (short and long sentences interleaved, not uniform medium)
 
 ### SEO mechanics

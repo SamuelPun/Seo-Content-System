@@ -5,6 +5,7 @@ import sys
 from pathlib import Path
 
 BANNED = [
+    ("—", "HIGH"),
     ("delve", "HIGH"),
     ("delve into", "HIGH"),
     ("embark", "HIGH"),
@@ -131,6 +132,11 @@ def scan(text):
                 continue
             if " " in phrase:
                 if phrase in line_lower:
+                    hits.append({"phrase": phrase, "severity": severity, "line_number": line_num, "line_text": line.strip()})
+                    matched_in_line.add(phrase)
+            elif not any(c.isalnum() for c in phrase):
+                # Non-alphanumeric patterns (e.g. em dash) — direct match on original line
+                if phrase in line:
                     hits.append({"phrase": phrase, "severity": severity, "line_number": line_num, "line_text": line.strip()})
                     matched_in_line.add(phrase)
             else:

@@ -6,38 +6,46 @@ Chains all scripts and Claude Code sessions together for a single article.
 Usage:
     python3 run_workflow.py --article "us-expat-tax" --step all
     python3 run_workflow.py --article "us-expat-tax" --step keyword
-    python3 run_workflow.py --article "us-expat-tax" --from outline
+    python3 run_workflow.py --article "us-expat-tax" --from headline-outline
     python3 run_workflow.py --article "us-expat-tax" --step audit --force
 """
 
 import argparse
 import json
 import os
+import re
 import subprocess
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
 
+def normalise_slug(name: str) -> str:
+    """Convert any article name to a filesystem-safe hyphenated slug."""
+    slug = name.lower().strip()
+    slug = re.sub(r'[^a-z0-9]+', '-', slug)
+    return slug.strip('-')
 
-def init_article_files(slug, workspace_path):
+
+def init_article_files(slug, workspace_path, display_name=None):
     """Initialise work-log.md and writer-notes.md for a new article."""
+    label = display_name or slug
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
 
     work_log_path = workspace_path / "work-log.md"
     if not work_log_path.exists():
         work_log_path.write_text(
-            f"# Work Log — {slug}\n"
+            f"# Work Log — {label}\n"
             "*Append-only. Written by every skill step and the orchestrator. Never edited — only added to.*\n"
             "*Read by: human editor at any gate, revision skill before final pass.*\n\n"
             f"---\nstep: init | {timestamp} | status: complete\n---\n"
-            f"Workspace created for {slug}. work-log.md and writer-notes.md initialised.\n\n"
+            f"Workspace created for {label}. work-log.md and writer-notes.md initialised.\n\n"
         )
 
     writer_notes_path = workspace_path / "writer-notes.md"
     if not writer_notes_path.exists():
         writer_notes_path.write_text(
-            f"# Writer Notes — {slug}\n"
+            f"# Writer Notes — {label}\n"
             "*Append-only. Written on instinct — not on a schedule. Short, unpolished, honest.*\n"
             "*Written by: writing skill, audit skill, human editor (at revision gate).*\n"
             "*Read by: revision skill before final pass. Human editor after the run for system improvement.*\n\n"
@@ -71,20 +79,19 @@ def log_step_end(slug, workspace_path, step_name, status, note=""):
 # ---------------------------------------------------------------------------
 
 STEPS = [
-    "keyword",   # fetch_serp + fetch_url (SERP pages) → serp-urls.json, serp-pages/
-    "angle",     # Claude Code session → angle.md
-    "headline",  # Claude Code session → headline.md
-    "outline",   # Claude Code session + fetch_sitemap → outline.md
-    "research",  # fetch_serp (sources) + fetch_url → sources/
-    "writing",   # Claude Code session → draft.md
-    "audit",     # scan_banned_phrases + analyse_rhythm + Claude Code → draft.md revised
-    "revision",  # Human + Claude Code session → draft.md final
-    "links",     # match_internal_links → internal-link-candidates.json
-    "output",    # validate_meta + generate_schema + build_output → final.html
+    "keyword",          # fetch_serp + fetch_url (SERP pages) → serp-urls.json, serp-pages/
+    "angle",            # Claude Code session → angle.md
+    "headline-outline", # fetch_sitemap + Claude Code session → headline.md, outline.md
+    "research",         # fetch_url (sources) → sources/
+    "writing",          # Claude Code session → draft.md
+    "audit",            # scan_banned_phrases + analyse_rhythm + Claude Code → draft.md revised
+    "revision",         # Human + Claude Code session → draft.md final
+    "links",            # match_internal_links → internal-link-candidates.json
+    "output",           # validate_meta + generate_schema + build_output → final.html
 ]
 
 # Steps where the orchestrator pauses and waits for human input before continuing
-HUMAN_GATES = {"angle", "headline", "research", "revision"}
+HUMAN_GATES = {"angle", "headline-outline", "research", "revision"}
 
 WORKSPACE_BASE = Path("workspace/article")
 SCRIPTS_DIR = Path("scripts")
@@ -109,7 +116,7 @@ def load_log(article: str) -> dict:
     if p.exists():
         with open(p) as f:
             return json.load(f)
-    return {"article": article, "keyword": "", "steps": {}}
+    return {"article": article, "display_name": article, "keyword": "", "steps": {}}
 
 
 def save_log(article: str, log: dict):
@@ -153,10 +160,11 @@ def run_script(script_name: str, args: list[str]) -> bool:
     return True
 
 
-def run_claude_skill(skill_file: str, article: str) -> bool:
+def run_claude_skill(skill_file: str, article: str, seed: str = None) -> bool:
     """
     Launch a Claude Code session with the given skill file.
-    The skill file is passed as the initial prompt.
+    Optional seed is injected before the skill content so Claude can
+    build on the editor's idea rather than starting from scratch.
     Returns True on success.
     """
     skill_path = SKILLS_DIR / skill_file
@@ -168,12 +176,21 @@ def run_claude_skill(skill_file: str, article: str) -> bool:
 
     skill_content = skill_path.read_text()
 
-    # Inject workspace path into the skill prompt
-    prompt = f"WORKSPACE: {ws.resolve()}\n\n{skill_content}"
+    if seed:
+        prompt = (
+            f"WORKSPACE: {ws.resolve()}\n\n"
+            f"EDITOR SEED — use this as your starting point, verify and build on it "
+            f"using the SERP data and inputs: {seed}\n\n"
+            f"{skill_content}"
+        )
+    else:
+        prompt = f"WORKSPACE: {ws.resolve()}\n\n{skill_content}"
 
     print_status(f"Launching Claude Code — skill: {skill_file}")
     result = subprocess.run(
-        ["claude", "--print", prompt],
+        ["claude", "--print", "--dangerously-skip-permissions"],
+        input=prompt,
+        text=True,
         cwd=str(Path.cwd())
     )
     if result.returncode != 0:
@@ -182,18 +199,152 @@ def run_claude_skill(skill_file: str, article: str) -> bool:
     return True
 
 
-def human_gate(step: str):
-    """Pause and wait for human confirmation before continuing."""
-    print()
-    print(f"  ⏸  HUMAN GATE — {step.upper()}")
-    print(f"     Review the output for '{step}' in your workspace folder.")
-    print(f"     Edit if needed, then press Enter to continue (or Ctrl+C to stop).")
+# ---------------------------------------------------------------------------
+# Interactive gate helpers
+# ---------------------------------------------------------------------------
+
+def _parse_angle(angle_path: Path):
+    """Extract target reader and angle statement from angle.md."""
+    if not angle_path.exists():
+        return None, None
+    text = angle_path.read_text(encoding="utf-8")
+    reader_m = re.search(r'## Target reader\s*\n([^\n#]+)', text)
+    angle_m  = re.search(r'## Our angle\s*\n([^\n#]+)', text)
+    reader = reader_m.group(1).strip() if reader_m else None
+    angle  = angle_m.group(1).strip()  if angle_m  else None
+    return reader, angle
+
+
+def _parse_headlines(headline_path: Path):
+    """Extract headline option texts from headline.md."""
+    if not headline_path.exists():
+        return []
+    text = headline_path.read_text(encoding="utf-8")
+    return [m.strip() for m in re.findall(r'## Option \d+\n([^\n*]+)', text) if m.strip()]
+
+
+def _write_chosen_headline(headline_path: Path, outline_path: Path, chosen: str):
+    """Write chosen headline into the Chosen headline field in both files."""
+    for path in [headline_path, outline_path]:
+        if not path.exists():
+            continue
+        lines = path.read_text(encoding="utf-8").splitlines()
+        new_lines = []
+        for line in lines:
+            if line.startswith("**Chosen headline:**"):
+                new_lines.append(f"**Chosen headline:** {chosen}")
+            elif line.strip() == "## Chosen headline":
+                new_lines.append(line)
+                new_lines.append(chosen)
+                # skip the next line if it's a placeholder
+                continue
+            else:
+                new_lines.append(line)
+        path.write_text("\n".join(new_lines) + "\n", encoding="utf-8")
+
+
+def _parse_research_summary(sources_dir: Path):
+    """Return (source_count, gaps) from sources/index.json."""
+    index_path = sources_dir / "index.json"
+    if not index_path.exists():
+        return 0, []
+    try:
+        data = json.loads(index_path.read_text(encoding="utf-8"))
+        return len(data.get("sources", [])), data.get("gaps", [])
+    except Exception:
+        return 0, []
+
+
+def _parse_revision_flags(ws: Path):
+    """Return (flags, ready_status) from revision-notes.md."""
+    notes_path = ws / "revision-notes.md"
+    if not notes_path.exists():
+        return [], "unknown"
+    text = notes_path.read_text(encoding="utf-8")
+    flags = re.findall(r'^- (.+)$', text, re.MULTILINE)
+    ready_m = re.search(r'## Ready to publish\?\s*\n([^\n]+)', text)
+    ready = ready_m.group(1).strip() if ready_m else "unknown"
+    return flags, ready
+
+
+def interactive_gate(step: str, ws: Path):
+    """Present key decisions from each gate step directly in the terminal."""
     print()
     try:
-        input("     Press Enter when ready → ")
+        if step == "angle":
+            reader, angle = _parse_angle(ws / "angle.md")
+            print("  ⏸  ANGLE REVIEW")
+            if reader:
+                print(f"  Target reader : {reader}")
+            if angle:
+                print(f"  Our angle     : {angle}")
+            print()
+            print("  Press Enter to accept, or type your own angle:")
+            raw = input("  → ").strip()
+            if raw:
+                angle_path = ws / "angle.md"
+                if angle_path.exists():
+                    text = angle_path.read_text(encoding="utf-8")
+                    text = re.sub(r'(## Our angle\s*\n)[^\n#]*', rf'\g<1>{raw}\n', text)
+                    angle_path.write_text(text, encoding="utf-8")
+                print_status(f"Angle updated to: {raw}", "ok")
+
+        elif step == "headline-outline":
+            options = _parse_headlines(ws / "headline.md")
+            print("  ⏸  HEADLINE OPTIONS")
+            if options:
+                for i, opt in enumerate(options, 1):
+                    print(f"  [{i}] {opt}  ({len(opt)} chars)")
+            else:
+                print("  (Could not parse headline options — review headline.md manually)")
+            print()
+            print("  Select 1–5, type your own, or press Enter to edit files manually:")
+            raw = input("  → ").strip()
+            if raw:
+                if raw.isdigit() and options and 1 <= int(raw) <= len(options):
+                    chosen = options[int(raw) - 1]
+                else:
+                    chosen = raw
+                _write_chosen_headline(ws / "headline.md", ws / "outline.md", chosen)
+                print_status(f"Chosen: {chosen}", "ok")
+            else:
+                print("  Edit headline.md and outline.md, then press Enter when ready.")
+                input("  → ")
+
+        elif step == "research":
+            source_count, gaps = _parse_research_summary(ws / "sources")
+            print("  ⏸  RESEARCH REVIEW")
+            print(f"  Sources gathered : {source_count}")
+            if gaps:
+                print(f"  Gaps flagged     : {len(gaps)}")
+                for g in gaps[:5]:
+                    impact  = g.get("impact", "?").upper()
+                    missing = g.get("missing", "")
+                    print(f"    [{impact}] {missing}")
+            print()
+            print("  Press Enter to accept, or review sources/index.json manually first:")
+            input("  → ")
+
+        elif step == "revision":
+            flags, ready = _parse_revision_flags(ws)
+            print("  ⏸  REVISION REVIEW")
+            print(f"  Status : {ready}")
+            if flags:
+                print(f"  Flags  ({len(flags)}):")
+                for f in flags[:10]:
+                    print(f"    · {f}")
+            print()
+            print("  Press Enter to continue to output:")
+            input("  → ")
+
+        else:
+            print(f"  ⏸  {step.upper()} — review workspace files, then press Enter:")
+            input("  → ")
+
     except KeyboardInterrupt:
-        print("\n\n  Stopped at human gate. Run again with --from {step} to resume.")
+        print(f"\n\n  Stopped. Resume with: --from {step}")
         sys.exit(0)
+
     print()
 
 
@@ -202,8 +353,9 @@ def get_keyword(article: str) -> str:
     log = load_log(article)
     kw = log.get("keyword", "").strip()
     if not kw:
+        label = log.get("display_name", article)
         print()
-        kw = input("  Enter the target keyword for this article: ").strip()
+        kw = input(f"  Enter the target keyword for '{label}': ").strip()
         log["keyword"] = kw
         save_log(article, log)
     return kw
@@ -241,31 +393,56 @@ def step_keyword(article: str):
     urls = [entry.get("url") for entry in serp_data if entry.get("url")]
     for i, url in enumerate(urls[:10], 1):
         out_file = serp_pages_dir / f"{i}.md"
-        run_script("fetch_url.py", ["--url", url, "--out", str(out_file)])
+        ok = run_script("fetch_url.py", ["--url", url, "--out", str(out_file)])
+        if not ok:
+            print_status(f"fetch_url failed for URL {i} — skipping (partial SERP data)", "error")
 
     return True
 
 
 def step_angle(article: str):
-    return run_claude_skill("keyword-and-angle.md", article)
+    print()
+    seed = input("  Your angle idea (Enter to let Claude analyse the SERP freely): ").strip()
+    return run_claude_skill("keyword-and-angle.md", article, seed=seed or None)
 
 
-def step_headline(article: str):
-    return run_claude_skill("headline-and-outline.md", article)
-
-
-def step_outline(article: str):
+def step_headline_outline(article: str):
     ws = workspace(article)
-    # Fetch sitemap first (refreshes internal link candidates)
-    run_script("fetch_sitemap.py", ["--out-dir", str(ws)])
-    return run_claude_skill("headline-and-outline.md", article)
+    print()
+    seed = input("  Your headline idea (Enter for Claude's options): ").strip()
+    ok = run_script("fetch_sitemap.py", ["--out-dir", str(ws)])
+    if not ok:
+        print_status("fetch_sitemap failed — sitemap-candidates.json will be missing; links step will fail", "error")
+        return False
+    return run_claude_skill("headline-and-outline.md", article, seed=seed or None)
 
 
 def step_research(article: str):
     ws = workspace(article)
     sources_dir = ws / "sources"
     sources_dir.mkdir(parents=True, exist_ok=True)
-    return run_claude_skill("research-authority.md", article)
+
+    ok = run_claude_skill("research-authority.md", article)
+    if not ok:
+        return False
+
+    index_path = sources_dir / "index.json"
+    if not index_path.exists():
+        print_status("Claude exited cleanly but sources/index.json was not written — research produced nothing", "error")
+        return False
+
+    try:
+        index = json.loads(index_path.read_text(encoding="utf-8"))
+        sources = index.get("sources", [])
+        if not sources:
+            print_status("sources/index.json exists but contains no sources — research produced nothing", "error")
+            return False
+        print_status(f"sources verified: {len(sources)} source(s) in index", "ok")
+    except (json.JSONDecodeError, Exception) as e:
+        print_status(f"sources/index.json is not valid JSON: {e}", "error")
+        return False
+
+    return True
 
 
 def step_writing(article: str):
@@ -281,14 +458,21 @@ def step_audit(article: str):
         return False
 
     # Run both analysis scripts against the draft
-    run_script("scan_banned_phrases.py", [
+    ok = run_script("scan_banned_phrases.py", [
         "--draft", str(draft),
         "--out-dir", str(ws)
     ])
-    run_script("analyse_rhythm.py", [
+    if not ok:
+        print_status("scan_banned_phrases failed — audit-flags.json not created", "error")
+        return False
+
+    ok = run_script("analyse_rhythm.py", [
         "--draft", str(draft),
         "--out-dir", str(ws)
     ])
+    if not ok:
+        print_status("analyse_rhythm failed — rhythm-analysis.json not created", "error")
+        return False
 
     # Claude Code session to revise based on audit output
     return run_claude_skill("audit.md", article)
@@ -304,7 +488,11 @@ def step_links(article: str):
     sitemap = ws / "sitemap-candidates.json"
 
     if not draft.exists():
-        print_status("draft.md not found", "error")
+        print_status("draft.md not found — run 'writing' step first", "error")
+        return False
+
+    if not sitemap.exists():
+        print_status("sitemap-candidates.json not found — run 'headline-outline' step first", "error")
         return False
 
     return run_script("match_internal_links.py", [
@@ -327,18 +515,23 @@ def step_output(article: str):
         return False
 
     # Generate meta, schema, then assemble HTML
-    run_script("validate_meta.py", [
+    ok = run_script("validate_meta.py", [
         "--draft", str(draft),
         "--out-dir", str(ws)
     ])
-    run_script("generate_schema.py", [
+    if not ok:
+        return False
+
+    ok = run_script("generate_schema.py", [
         "--draft", str(draft),
         "--out-dir", str(ws)
     ])
-    run_script("build_output.py", [
+    if not ok:
+        return False
+
+    return run_script("build_output.py", [
         "--workspace", str(ws)
     ])
-    return True
 
 
 # ---------------------------------------------------------------------------
@@ -346,16 +539,15 @@ def step_output(article: str):
 # ---------------------------------------------------------------------------
 
 STEP_RUNNERS = {
-    "keyword":  step_keyword,
-    "angle":    step_angle,
-    "headline": step_headline,
-    "outline":  step_outline,
-    "research": step_research,
-    "writing":  step_writing,
-    "audit":    step_audit,
-    "revision": step_revision,
-    "links":    step_links,
-    "output":   step_output,
+    "keyword":          step_keyword,
+    "angle":            step_angle,
+    "headline-outline": step_headline_outline,
+    "research":         step_research,
+    "writing":          step_writing,
+    "audit":            step_audit,
+    "revision":         step_revision,
+    "links":            step_links,
+    "output":           step_output,
 }
 
 
@@ -373,7 +565,8 @@ def main():
                         help="Re-run step even if already marked complete")
     args = parser.parse_args()
 
-    article = args.article
+    display_name = args.article
+    article = normalise_slug(display_name)
     ws = workspace(article)
     ws.mkdir(parents=True, exist_ok=True)
 
@@ -381,8 +574,9 @@ def main():
     log = load_log(article)
     if not log.get("steps"):
         log["steps"] = {s: {"status": "pending"} for s in STEPS}
+        log["display_name"] = display_name
         save_log(article, log)
-    init_article_files(article, ws)
+    init_article_files(article, ws, display_name)
 
     # Determine which steps to run
     if args.step == "all" or args.from_step:
@@ -400,7 +594,7 @@ def main():
         steps_to_run = [args.step]
 
     print()
-    print(f"  SEO Content System — {article}")
+    print(f"  SEO Content System — {display_name}  [{article}]")
     print(f"  {'─' * 40}")
     print()
 
@@ -411,20 +605,23 @@ def main():
             continue
 
         print_status(f"Starting step: {step.upper()}")
+        log_step_start(article, ws, step)
 
         runner = STEP_RUNNERS[step]
         success = runner(article)
 
         if not success:
+            log_step_end(article, ws, step, "failed")
             print_status(f"Step '{step}' failed. Fix the issue and re-run with --step {step} --force", "error")
             sys.exit(1)
 
         mark_complete(article, step)
+        log_step_end(article, ws, step, "complete")
         print_status(f"{step} — done", "ok")
 
-        # Human gate — pause before continuing to next step
+        # Interactive gate — pause before continuing to next step
         if step in HUMAN_GATES and steps_to_run.index(step) < len(steps_to_run) - 1:
-            human_gate(step)
+            interactive_gate(step, ws)
 
     print()
     print_status(f"All done. Workspace: {ws.resolve()}", "ok")
