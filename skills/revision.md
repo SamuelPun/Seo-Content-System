@@ -5,18 +5,18 @@
 
 ## Before you begin revision: read these two files
 
-**1. Read work-log.md in full.**
+**1. Read `EDITORIAL_DIR/work-log.md` in full.**
 Scan every entry from `init` through `audit`. You are looking for:
 - Steps that ran partial or with errors — what data might be degraded or missing
 - Workarounds that were used — decisions that may need to be revisited
 - Human gate decisions — what the editor approved or changed and why
 
-**2. Read writer-notes.md in full.**
+**2. Read `EDITORIAL_DIR/writer-notes.md` in full.**
 These are observations from the writing and audit sessions. Some will be directly actionable (a flagged section to tighten, a claim to verify). Some will be context (why a structural decision was made). Some will be signals for the human editor rather than for you.
 
 Act on notes that fall within the revision skill's remit. Pass the rest to the human via revision-notes.md.
 
-**After revision, write one entry to work-log.md:**
+**After revision, write one entry to `EDITORIAL_DIR/work-log.md`:**
 
 ```
 ---
@@ -43,16 +43,16 @@ This is a different job from the audit step. The audit fixed mechanical issues. 
 
 ## Inputs — read all of these
 
-Article files are in the WORKSPACE path provided at the top of this prompt. Brand files are in the BRAND_DIR path provided at the top of this prompt.
+Editorial files are in EDITORIAL_DIR. Data files are in DATA_DIR. Brand files are in BRAND_DIR.
 
 | File | What it contains |
 |---|---|
-| `{WORKSPACE}/draft.md` | The audited draft — may include human edits since the audit step |
-| `{WORKSPACE}/outline.md` | The approved outline — check the final draft still honours the structure and intent |
-| `{WORKSPACE}/angle.md` | The approved angle — the editorial test everything is measured against |
-| `{BRAND_DIR}/brand-voice-card.md` | Brand voice — final check that voice is consistent throughout |
-| `{WORKSPACE}/sources/index.json` | Research index — verify all claims in the draft are supported |
-| `{WORKSPACE}/keyword.json` | Target keyword and PAA questions — final SEO check |
+| `EDITORIAL_DIR/draft.md` | The audited draft — may include human edits since the audit step |
+| `EDITORIAL_DIR/outline.md` | The approved outline — check the final draft still honours the structure and intent |
+| `EDITORIAL_DIR/angle.md` | The approved angle — the editorial test everything is measured against |
+| `BRAND_DIR/brand-voice-card.md` | Brand voice — final check that voice is consistent throughout |
+| `DATA_DIR/sources/index.json` | Research index — verify all claims in the draft are supported |
+| `DATA_DIR/keyword.json` | Target keyword and PAA questions — final SEO check |
 
 ---
 
@@ -104,7 +104,7 @@ Read the full draft as the target reader described in `angle.md`. Ask:
 
 Do not edit the draft directly in this step unless fixing something minor and mechanical (a broken sentence, a missing word, an obvious error).
 
-Instead, write `revision-notes.md` to the workspace:
+Instead, write `revision-notes.md` to EDITORIAL_DIR:
 
 ```markdown
 # Revision Notes — [keyword]
@@ -132,7 +132,7 @@ Yes / Not yet — [if not, list what needs addressing before pressing Enter]
 
 If your revision notes identify issues the human needs to address, end your session with the notes visible and wait. Do not proceed.
 
-If the draft is clean and ready, make any minor mechanical fixes directly in `draft.md`, update the frontmatter status to `final`, and end your session.
+If the draft is clean and ready, make any minor mechanical fixes directly in `EDITORIAL_DIR/draft.md`, update the frontmatter status to `final`, and end your session.
 
 Update frontmatter:
 
@@ -160,5 +160,5 @@ End your session with:
 > Device sections: [working well / flagged — see revision-notes.md]
 > Status: [Ready to publish / Needs attention]
 >
-> Review `revision-notes.md` for any flags that need your decision.
+> Review `EDITORIAL_DIR/revision-notes.md` for any flags that need your decision.
 > When you're satisfied, press Enter to build the final output.

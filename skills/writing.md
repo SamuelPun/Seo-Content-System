@@ -13,18 +13,18 @@ You do not plan. You do not summarise what you are about to write. You write.
 
 ## Inputs — read all of these before writing a single word
 
-Article files are in the WORKSPACE path provided at the top of this prompt. Brand files are in the BRAND_DIR path provided at the top of this prompt.
+Editorial files are in EDITORIAL_DIR. Data files are in DATA_DIR. Brand files are in BRAND_DIR.
 
 | File | What it contains |
 |---|---|
-| `{WORKSPACE}/outline.md` | Your section-by-section brief — follow this structure exactly |
-| `{WORKSPACE}/angle.md` | The editorial position — every paragraph must serve this angle |
-| `{WORKSPACE}/sources/index.json` | Research index — which sources support which sections |
-| `{WORKSPACE}/sources/[slug].md` | Individual source files — read before writing the section that uses each one |
-| `{BRAND_DIR}/brand-voice-card.md` | Brand voice — tone, vocabulary, sentence patterns to use and avoid |
-| `{BRAND_DIR}/de-ai-guidelines.md` | De-AI rules — patterns to avoid so the writing sounds human |
-| `{WORKSPACE}/keyword.json` | Target keyword and PAA questions |
-| `{SKILLS_DIR}/content-devices.md` | Device library — read any device listed in the outline before writing that section |
+| `EDITORIAL_DIR/outline.md` | Your section-by-section brief — follow this structure exactly |
+| `EDITORIAL_DIR/angle.md` | The editorial position — every paragraph must serve this angle |
+| `DATA_DIR/sources/index.json` | Research index — which sources support which sections |
+| `DATA_DIR/sources/[slug].md` | Individual source files — read before writing the section that uses each one |
+| `BRAND_DIR/brand-voice-card.md` | Brand voice — tone, vocabulary, sentence patterns to use and avoid |
+| `BRAND_DIR/de-ai-guidelines.md` | De-AI rules — patterns to avoid so the writing sounds human |
+| `DATA_DIR/keyword.json` | Target keyword and PAA questions |
+| `skills/content-devices.md` | Device library — read any device listed in the outline before writing that section |
 | `skills/content-standards.md` | Structural standards — word count, sentence length, paragraph length, headings, links, CTA rules |
 
 Do not begin writing until you have read all of the above.
@@ -145,7 +145,7 @@ delve, tapestry, nuance/nuanced, foster, robust, leverage (as a verb), utilize, 
 
 ## Draft format
 
-Write `draft.md` to the workspace using this format:
+Write `draft.md` to EDITORIAL_DIR using this format:
 
 ```markdown
 ---
@@ -184,11 +184,11 @@ Before writing the final line, re-read the full draft and verify:
 
 - [ ] Every section from the outline is present
 - [ ] Every PAA question is answered
-- [ ] The angle from `angle.md` is visible throughout — not just in the intro
-- [ ] No banned vocabulary from `de-ai-guidelines.md`
+- [ ] The angle from `EDITORIAL_DIR/angle.md` is visible throughout — not just in the intro
+- [ ] No banned vocabulary from `BRAND_DIR/de-ai-guidelines.md`
 - [ ] No AI structural patterns (throat-clearing, parallel list overuse, restated questions)
-- [ ] Brand voice consistent with `brand-voice-card.md`
-- [ ] All sources cited are from `sources/` — no invented data
+- [ ] Brand voice consistent with `BRAND_DIR/brand-voice-card.md`
+- [ ] All sources cited are from `DATA_DIR/sources/` — no invented data
 - [ ] Word count within 10% of target
 
 ---

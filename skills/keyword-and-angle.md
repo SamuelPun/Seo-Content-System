@@ -13,14 +13,14 @@ You do not write the article. You do not write headlines. You produce two output
 
 ## Inputs — read these first
 
-All files are in the WORKSPACE path provided at the top of this prompt.
+Input files are in the DATA_DIR path provided at the top of this prompt.
 
 | File | What it contains |
 |---|---|
-| `serp-urls.json` | The top organic results for the target keyword (URL, domain, title, position) |
-| `paa.json` | People Also Ask questions Google is showing for this keyword |
-| `serp-pages/1.md` … `serp-pages/10.md` | Clean markdown of each ranking page — your competitor analysis source |
-| `log.json` | Contains `keyword` field — the exact target keyword |
+| `DATA_DIR/serp-urls.json` | The top organic results for the target keyword (URL, domain, title, position) |
+| `DATA_DIR/paa.json` | People Also Ask questions Google is showing for this keyword |
+| `DATA_DIR/serp-pages/1.md` … `DATA_DIR/serp-pages/10.md` | Clean markdown of each ranking page — your competitor analysis source |
+| `DATA_DIR/log.json` | Contains `keyword` field — the exact target keyword |
 
 Read all available serp-pages files before forming any conclusions.
 
@@ -54,7 +54,7 @@ Work through these questions. Think carefully before writing anything.
 
 ## Step 2 — Define the keyword
 
-Write `keyword.json` to the workspace:
+Write `keyword.json` to DATA_DIR:
 
 ```json
 {
@@ -85,7 +85,7 @@ A good angle is:
 - Achievable — we can actually deliver on it with credible content
 - Not just a format choice (e.g. "more comprehensive") — it must be a *perspective*
 
-Write `angle.md` to the workspace with this structure:
+Write `angle.md` to EDITORIAL_DIR with this structure:
 
 ```markdown
 # Angle — [keyword]
@@ -126,4 +126,4 @@ When both files are written, end your session with:
 > Target reader: [one sentence]
 > Our angle: [one sentence]
 >
-> Review `angle.md` in your workspace. Edit freely, then press Enter in the terminal to continue to headline and outline.
+> Review `angle.md` in your EDITORIAL_DIR folder. Edit freely, then press Enter in the terminal to continue to headline and outline.

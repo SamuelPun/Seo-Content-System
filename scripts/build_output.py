@@ -53,13 +53,18 @@ def build_html(title, description, url, body_html, schemas, internal_links):
 
 
 def run(workspace: Path) -> bool:
-    draft_path   = workspace / "draft.md"
-    meta_path    = workspace / "meta.json"
-    schema_path  = workspace / "schema.json"
-    links_path   = workspace / "internal-link-candidates.json"
+    editorial_dir = workspace / "editorial"
+    data_dir      = workspace / "data"
+    publish_dir   = workspace / "publish"
+    publish_dir.mkdir(parents=True, exist_ok=True)
+
+    draft_path   = editorial_dir / "draft.md"
+    meta_path    = data_dir / "meta.json"
+    schema_path  = data_dir / "schema.json"
+    links_path   = data_dir / "internal-link-candidates.json"
 
     if not draft_path.exists():
-        print(f"ERROR: draft.md not found in {workspace}", file=sys.stderr)
+        print(f"ERROR: editorial/draft.md not found in {workspace}", file=sys.stderr)
         return False
 
     print(f"[INFO] Building output from {workspace}")
@@ -77,7 +82,7 @@ def run(workspace: Path) -> bool:
 
     html = build_html(title, description, url, body_html, schemas, internal_links)
 
-    out_path = workspace / "final.html"
+    out_path = publish_dir / "final.html"
     out_path.write_text(html, encoding="utf-8")
     print(f"[OK]   {out_path}")
 

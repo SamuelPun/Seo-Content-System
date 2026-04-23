@@ -13,13 +13,13 @@ You do not write the article. You produce `headline.md` and `outline.md`.
 
 ## Inputs — read all of these before writing anything
 
-Article files are in the WORKSPACE path provided at the top of this prompt. `skills/` files are at the project root.
+Editorial files are in EDITORIAL_DIR. Data files are in DATA_DIR. `skills/` files are at the project root.
 
 | File | What it contains |
 |---|---|
-| `angle.md` | The approved editorial angle — your brief for everything in this session |
-| `keyword.json` | Target keyword, intent, format, word count range, table stakes, PAA questions |
-| `serp-urls.json` | Competitor titles — for headline differentiation |
+| `EDITORIAL_DIR/angle.md` | The approved editorial angle — your brief for everything in this session |
+| `DATA_DIR/keyword.json` | Target keyword, intent, format, word count range, table stakes, PAA questions |
+| `DATA_DIR/serp-urls.json` | Competitor titles — for headline differentiation |
 | `skills/content-devices.md` | Library of original content devices — read this fully before building the outline |
 
 Read `angle.md` and `content-devices.md` fully before writing anything. Every headline and every outline section must serve the angle.
@@ -37,7 +37,7 @@ Produce 5 headline options. Each must:
 
 For each headline, write one sentence explaining what it prioritises and what it trades off.
 
-Write `headline.md` to the workspace:
+Write `headline.md` to EDITORIAL_DIR:
 
 ```markdown
 # Headline options — [keyword]
@@ -83,7 +83,7 @@ Based on the angle, the target reader, and the topic — select 2–4 devices th
 
 Do not select devices because they sound impressive. Select them because they will produce content this reader cannot get from any ranking page.
 
-Write your selected devices as a section in `outline.md` (see Step 3 format below).
+Write your selected devices as a section in `EDITORIAL_DIR/outline.md` (see Step 3 format below).
 
 ---
 
@@ -92,15 +92,15 @@ Write your selected devices as a section in `outline.md` (see Step 3 format belo
 The outline is the writer's brief. It must be detailed enough that the writer never has to guess what goes in a section.
 
 **Outline rules:**
-- Structure must match the dominant SERP format from `keyword.json`
-- Every table-stakes topic from `keyword.json` must appear somewhere
-- Every PAA question from `keyword.json` must be addressed in a named section or subsection
+- Structure must match the dominant SERP format from `DATA_DIR/keyword.json`
+- Every table-stakes topic from `DATA_DIR/keyword.json` must appear somewhere
+- Every PAA question from `DATA_DIR/keyword.json` must be addressed in a named section or subsection
 - Sections must flow logically — each section earns its place by serving the reader's journey
 - Include a suggested word count per section (total must match `word_count_range` in keyword.json)
 - Flag where external authority sources, data, or expert quotes should go
 - Content devices must be embedded as named sections or subsections — not added as an afterthought
 
-Write `outline.md` to the workspace:
+Write `outline.md` to EDITORIAL_DIR:
 
 ```markdown
 # Outline — [keyword]
@@ -168,9 +168,9 @@ When both files are written, end your session with:
 > Content devices selected: [list them]
 >
 > Two things to do before pressing Enter:
-> 1. Open `headline.md` — write your chosen headline in the "Chosen headline" field at the bottom.
-> 2. Open `outline.md` — copy your chosen headline into the **Chosen headline** field at the top. Then review all sections and edit anything before continuing.
+> 1. Open `EDITORIAL_DIR/headline.md` — write your chosen headline in the "Chosen headline" field at the bottom.
+> 2. Open `EDITORIAL_DIR/outline.md` — copy your chosen headline into the **Chosen headline** field at the top. Then review all sections and edit anything before continuing.
 >
-> The writer works from `outline.md` only. If the headline isn't updated there, the writer won't have it.
+> The writer works from `EDITORIAL_DIR/outline.md` only. If the headline isn't updated there, the writer won't have it.
 >
 > Press Enter in the terminal when both files are updated and you're happy with the outline.

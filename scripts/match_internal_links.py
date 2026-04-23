@@ -1,59 +1,149 @@
+"""
+match_internal_links.py — Find internal link opportunities for a draft against the page index.
+
+Scores each indexed page by how well its title, headings, and keyphrases overlap
+with the keyphrases extracted from the draft. Title matches are weighted 3x,
+heading matches 2x, keyphrase matches 1x.
+
+Usage:
+    python match_internal_links.py --draft editorial/draft.md --page-index brand/page-index.json --out-dir data/
+
+Dependencies:
+    pip install yake
+"""
+
 import argparse
 import json
 import re
 import sys
 from pathlib import Path
 
+try:
+    import yake
+except ImportError:
+    print("ERROR: yake not installed. Run: pip install yake", file=sys.stderr)
+    sys.exit(1)
 
-def extract_keywords(text):
+
+_kw_extractor = yake.KeywordExtractor(lan="en", n=3, dedupLim=0.7, top=30, features=None)
+
+# Single-word terms so common across the site they add no signal — loaded from page-index.json
+_site_stopwords: set[str] = set()
+
+
+def load_site_stopwords(page_index_path: Path):
+    """Build a stopword set from terms that appear in 80%+ of indexed pages."""
+    global _site_stopwords
+    try:
+        data = json.loads(page_index_path.read_text(encoding="utf-8"))
+        pages = data.get("pages", [])
+        if len(pages) < 5:
+            return
+        threshold = len(pages) * 0.8
+        term_counts: dict[str, int] = {}
+        for page in pages:
+            seen = set()
+            for phrase in page.get("keyphrases", []):
+                for word in phrase.lower().split():
+                    if word not in seen:
+                        term_counts[word] = term_counts.get(word, 0) + 1
+                        seen.add(word)
+        _site_stopwords = {w for w, count in term_counts.items() if count >= threshold}
+    except Exception:
+        pass
+
+
+def extract_keyphrases(text: str) -> list[str]:
     text = re.sub(r'```.*?```', '', text, flags=re.DOTALL)
-    text = re.sub(r'[^\w\s]', ' ', text.lower())
-    words = text.split()
-    stopwords = {
-        'the','a','an','and','or','but','in','on','at','to','for','of','with',
-        'by','from','is','are','was','were','be','been','being','have','has',
-        'had','do','does','did','will','would','could','should','may','might',
-        'this','that','these','those','it','its','as','if','so','not','no',
-        'us','can','we','our','your','their','you','i','he','she','they',
-        'all','more','also','about','up','out','than','into','when','how',
-    }
-    return {w for w in words if w not in stopwords and len(w) > 3}
+    text = re.sub(r'^#+\s.*$', '', text, flags=re.MULTILINE)
+    text = text.strip()
+    if len(text) < 50:
+        return []
+    try:
+        results = _kw_extractor.extract_keywords(text)
+        phrases = [phrase.lower() for phrase, _score in results]
+        # Drop phrases where every word is a site-wide stopword
+        return [p for p in phrases if not all(w in _site_stopwords for w in p.split())]
+    except Exception:
+        return []
 
 
-def slug_to_keywords(url):
-    slug = url.rstrip('/').split('/')[-1]
-    slug = re.sub(r'[^a-z0-9]+', ' ', slug.lower())
-    return set(slug.split())
+def phrase_hits(phrase: str, targets: list[str]) -> bool:
+    """True if a multi-word phrase appears in (or shares words with) any target string."""
+    words = phrase.split()
+    if len(words) < 2:
+        return False
+    meaningful_words = set(words) - _site_stopwords
+    if not meaningful_words:
+        return False
+    for target in targets:
+        target_lower = target.lower()
+        if phrase in target_lower:
+            return True
+        if meaningful_words & set(target_lower.split()):
+            return True
+    return False
 
 
-def run(draft_path, candidates_path, out_dir, top_n=10):
+def score_page(draft_phrases: list[str], page: dict) -> tuple[int, list[str]]:
+    title    = [page.get("title", "").lower()]
+    headings = [h.lower() for h in page.get("headings", [])]
+    kws      = [k.lower() for k in page.get("keyphrases", [])]
+
+    score = 0
+    matched = []
+
+    for phrase in draft_phrases:
+        if phrase_hits(phrase, title):
+            score += 3
+            matched.append(phrase)
+        elif phrase_hits(phrase, headings):
+            score += 2
+            matched.append(phrase)
+        elif phrase_hits(phrase, kws):
+            score += 1
+            matched.append(phrase)
+
+    return score, matched
+
+
+def run(draft_path: Path, page_index_path: Path, out_dir: Path, top_n: int = 10) -> bool:
     if not draft_path.exists():
         print(f"ERROR: Draft not found: {draft_path}", file=sys.stderr)
         return False
-    if not candidates_path.exists():
-        print(f"ERROR: Candidates not found: {candidates_path}", file=sys.stderr)
+    if not page_index_path.exists():
+        print(f"ERROR: Page index not found: {page_index_path}", file=sys.stderr)
         return False
 
     out_dir.mkdir(parents=True, exist_ok=True)
 
+    load_site_stopwords(page_index_path)
+
     draft_text = draft_path.read_text(encoding="utf-8")
-    candidates = json.loads(candidates_path.read_text(encoding="utf-8"))
-    draft_keywords = extract_keywords(draft_text)
+    draft_phrases = extract_keyphrases(draft_text)
+
+    index_data = json.loads(page_index_path.read_text(encoding="utf-8"))
+    pages = index_data.get("pages", [])
+
+    if not pages:
+        print("WARN: page-index.json has no pages — run build_page_index.py first", file=sys.stderr)
+        out_path = out_dir / "internal-link-candidates.json"
+        out_path.write_text("[]", encoding="utf-8")
+        return True
 
     scored = []
-    for entry in candidates:
-        url = entry.get("url", "")
-        slug_kws = slug_to_keywords(url)
-        overlap = draft_keywords & slug_kws
-        if overlap:
+    for page in pages:
+        s, matched = score_page(draft_phrases, page)
+        if s > 0:
             scored.append({
-                "url":             url,
-                "lastmod":         entry.get("lastmod"),
-                "overlap_score":   len(overlap),
-                "matched_keywords": sorted(overlap),
+                "url":             page["url"],
+                "title":           page.get("title", ""),
+                "relevance_score": s,
+                "matched_phrases": list(dict.fromkeys(matched))[:5],
+                "lastmod":         page.get("lastmod"),
             })
 
-    scored.sort(key=lambda x: x["overlap_score"], reverse=True)
+    scored.sort(key=lambda x: x["relevance_score"], reverse=True)
     top = scored[:top_n]
 
     out_path = out_dir / "internal-link-candidates.json"
@@ -61,18 +151,19 @@ def run(draft_path, candidates_path, out_dir, top_n=10):
     print(f"[OK]   {out_path}")
     print(f"\n=== INTERNAL LINK CANDIDATES (top {top_n}) ===")
     for r in top:
-        kws = ", ".join(r["matched_keywords"][:5])
-        print(f"  [{r['overlap_score']:>2} matches]  {r['url']}")
-        print(f"            keywords: {kws}")
+        phrases = ", ".join(r["matched_phrases"])
+        print(f"  [{r['relevance_score']:>3} pts]  {r['title'] or r['url']}")
+        print(f"           {r['url']}")
+        print(f"           matched: {phrases}")
     if not top:
-        print("  No keyword overlap found with sitemap candidates.")
+        print("  No relevant pages found in the index.")
     return True
 
 
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--draft",      required=True)
-    parser.add_argument("--candidates", required=True, help="Path to sitemap-candidates.json")
+    parser.add_argument("--page-index", required=True, help="Path to brand/page-index.json")
     parser.add_argument("--out-dir",    required=True)
     parser.add_argument("--top",        type=int, default=10)
     return parser.parse_args()
@@ -80,7 +171,7 @@ def parse_args():
 
 def main():
     args = parse_args()
-    ok = run(Path(args.draft), Path(args.candidates), Path(args.out_dir), args.top)
+    ok = run(Path(args.draft), Path(args.page_index), Path(args.out_dir), args.top)
     sys.exit(0 if ok else 1)
 
 

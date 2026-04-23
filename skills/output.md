@@ -13,29 +13,29 @@ You do not rewrite the article. You verify, flag issues, and produce a clear pub
 
 ## Inputs — read all of these
 
-All files are in the WORKSPACE path provided at the top of this prompt.
+Publish files are in PUBLISH_DIR. Data files are in DATA_DIR. Editorial files are in EDITORIAL_DIR.
 
 | File | What it contains |
 |---|---|
-| `final.html` | The assembled publish-ready HTML file |
-| `meta.json` | SEO title and meta description — validated by `validate_meta.py` |
-| `schema.json` | Structured data markup (Article / FAQ / HowTo) |
-| `internal-link-candidates.json` | Recommended internal links with anchor text and target URLs |
-| `draft.md` | The final approved draft — use as reference for accuracy checks |
-| `outline.md` | Original outline — confirm final HTML reflects approved structure |
-| `keyword.json` | Target keyword — confirm it appears correctly in meta and content |
-| `serp-urls.json` | Competitor titles — cross-check that meta title is not duplicated |
+| `PUBLISH_DIR/final.html` | The assembled publish-ready HTML file |
+| `DATA_DIR/meta.json` | SEO title and meta description — validated by `validate_meta.py` |
+| `DATA_DIR/schema.json` | Structured data markup (Article / FAQ / HowTo) |
+| `DATA_DIR/internal-link-candidates.json` | Recommended internal links with anchor text and target URLs |
+| `EDITORIAL_DIR/draft.md` | The final approved draft — use as reference for accuracy checks |
+| `EDITORIAL_DIR/outline.md` | Original outline — confirm final HTML reflects approved structure |
+| `DATA_DIR/keyword.json` | Target keyword — confirm it appears correctly in meta and content |
+| `DATA_DIR/serp-urls.json` | Competitor titles — cross-check that meta title is not duplicated |
 
 ---
 
 ## Step 1 — Verify meta tags
 
-Read `meta.json`. Check:
+Read `DATA_DIR/meta.json`. Check:
 
 **SEO title:**
 - [ ] Contains the target keyword
 - [ ] Under 65 characters
-- [ ] Not duplicated from a competitor title (cross-check with `serp-urls.json` if available)
+- [ ] Not duplicated from a competitor title (cross-check with `DATA_DIR/serp-urls.json` if available)
 - [ ] Matches the chosen headline or is a clear SEO variant of it
 - [ ] No clickbait or misleading framing
 
@@ -45,13 +45,13 @@ Read `meta.json`. Check:
 - [ ] Describes what the reader will get — not generic ("Read our guide to...")
 - [ ] Has a clear value proposition or call to action
 
-If either fails, write the corrected version directly into `meta.json` and note what you changed.
+If either fails, write the corrected version directly into `DATA_DIR/meta.json` and note what you changed.
 
 ---
 
 ## Step 2 — Verify schema markup
 
-Read `schema.json`. Check:
+Read `DATA_DIR/schema.json`. Check:
 
 **Article schema:**
 - [ ] `headline` matches the SEO title
@@ -77,7 +77,7 @@ Flag any schema issues with: `[SCHEMA ISSUE: description]`
 
 ## Step 3 — Verify internal links
 
-Read `internal-link-candidates.json`. For each recommended link:
+Read `DATA_DIR/internal-link-candidates.json`. For each recommended link:
 
 - [ ] The anchor text reads naturally in the sentence it appears in
 - [ ] The target URL is relevant to the anchor text and the surrounding content
@@ -90,7 +90,7 @@ Flag any links that feel forced or irrelevant. Recommend removing them rather th
 
 ## Step 4 — Verify the HTML
 
-Read `final.html`. Check:
+Read `PUBLISH_DIR/final.html`. Check:
 
 **Structure:**
 - [ ] H1 matches the chosen headline exactly (only one H1)
@@ -99,7 +99,7 @@ Read `final.html`. Check:
 - [ ] No heading tags used for non-heading content (e.g. pull quotes)
 
 **Content integrity:**
-- [ ] All sections from `draft.md` are present in the HTML
+- [ ] All sections from `EDITORIAL_DIR/draft.md` are present in the HTML
 - [ ] No content truncated or missing
 - [ ] All source citations are present and correctly linked
 - [ ] No `[SOURCE NEEDED]` placeholders left in the content
@@ -109,8 +109,8 @@ Read `final.html`. Check:
 - [ ] Schema is valid JSON (check for unclosed brackets, missing commas)
 
 **Meta tags in HTML:**
-- [ ] `<title>` tag matches `meta.json` SEO title
-- [ ] `<meta name="description">` matches `meta.json` description
+- [ ] `<title>` tag matches `DATA_DIR/meta.json` SEO title
+- [ ] `<meta name="description">` matches `DATA_DIR/meta.json` description
 - [ ] Both are inside `<head>`
 
 **Technical:**
@@ -122,7 +122,7 @@ Read `final.html`. Check:
 
 ## Step 5 — Write the publish checklist
 
-Write `publish-checklist.md` to the workspace:
+Write `publish-checklist.md` to PUBLISH_DIR:
 
 ```markdown
 # Publish Checklist — [keyword]

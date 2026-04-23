@@ -13,16 +13,16 @@ You do not write the article. You do not paraphrase the sources. You produce a s
 
 ## Inputs — read these first
 
-All files are in the WORKSPACE path provided at the top of this prompt.
+Editorial files are in EDITORIAL_DIR. Data files are in DATA_DIR.
 
 | File | What it contains |
 |---|---|
-| `outline.md` | The approved article outline — your brief. Every authority signal flagged here needs a source. |
-| `angle.md` | The editorial angle — research must support this position, not undermine it |
-| `keyword.json` | Target keyword and table-stakes topics |
-| `serp-pages/1.md` … `serp-pages/10.md` | Competitor pages — note what sources they cite, then find better ones |
+| `EDITORIAL_DIR/outline.md` | The approved article outline — your brief. Every authority signal flagged here needs a source. |
+| `EDITORIAL_DIR/angle.md` | The editorial angle — research must support this position, not undermine it |
+| `DATA_DIR/keyword.json` | Target keyword and table-stakes topics |
+| `DATA_DIR/serp-pages/1.md` … `DATA_DIR/serp-pages/10.md` | Competitor pages — note what sources they cite, then find better ones |
 
-Read `outline.md` fully before starting. Your job is to fill every "Authority signal needed" gap in the outline.
+Read `EDITORIAL_DIR/outline.md` fully before starting. Your job is to fill every "Authority signal needed" gap in the outline.
 
 ---
 
@@ -60,7 +60,7 @@ For each source, read the relevant section carefully. Extract only what is direc
 
 ## Step 3 — Write the sources index
 
-Write `sources/index.json` to the workspace:
+Write `sources/index.json` to DATA_DIR (i.e. `DATA_DIR/sources/index.json`):
 
 ```json
 {
@@ -87,7 +87,7 @@ Write `sources/index.json` to the workspace:
 
 ## Step 4 — Write individual source files
 
-For each source in the index, write a file `sources/[source-slug].md`:
+For each source in the index, write a file `DATA_DIR/sources/[source-slug].md`:
 
 ```markdown
 # [Source title]
@@ -129,7 +129,7 @@ If you cannot find a credible primary source for something flagged in the outlin
 - What kind of source would fill it
 - Whether the section can still be written credibly without it
 
-Add a `gaps` array to `sources/index.json`:
+Add a `gaps` array to `DATA_DIR/sources/index.json`:
 
 ```json
 "gaps": [
@@ -152,7 +152,7 @@ When all source files are written, end your session with:
 > Sources gathered: [N]
 > Gaps flagged: [N] — [list them briefly if any]
 >
-> Review `sources/index.json` before continuing. Check:
+> Review `DATA_DIR/sources/index.json` before continuing. Check:
 > - Are the sources credible and primary? (government, academic, official — not SEO blogs)
 > - Is there a source for every "Authority signal needed" in the outline?
 > - Are the gaps flagged acceptable, or do you want to find alternatives first?

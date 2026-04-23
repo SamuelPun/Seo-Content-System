@@ -27,28 +27,28 @@ You edit surgically. You do not rewrite sections from scratch. You do not improv
 
 ## Inputs — read all of these before touching the draft
 
-Article files are in the WORKSPACE path provided at the top of this prompt. Brand files are in the BRAND_DIR path provided at the top of this prompt.
+Editorial files are in EDITORIAL_DIR. Data files are in DATA_DIR. Brand files are in BRAND_DIR.
 
 | File | What it contains |
 |---|---|
-| `{WORKSPACE}/draft.md` | The article draft to audit and revise |
-| `{WORKSPACE}/audit-flags.json` | Output of `scan_banned_phrases.py` — exact locations of HIGH and MEDIUM severity flags |
-| `{WORKSPACE}/rhythm-analysis.json` | Output of `analyse_rhythm.py` — burstiness score, em dash count, sentence length data |
-| `{BRAND_DIR}/de-ai-guidelines.md` | Full de-AI rules — your editing standard |
-| `{BRAND_DIR}/brand-voice-card.md` | Brand voice — ensure revisions stay on-voice |
-| `{WORKSPACE}/angle.md` | The approved angle — ensure revisions don't drift from it |
-| `{SKILLS_DIR}/content-standards.md` | Structural standards — check introduction, paragraph length, sentence cap, CTA |
+| `EDITORIAL_DIR/draft.md` | The article draft to audit and revise |
+| `DATA_DIR/audit-flags.json` | Output of `scan_banned_phrases.py` — exact locations of HIGH and MEDIUM severity flags |
+| `DATA_DIR/rhythm-analysis.json` | Output of `analyse_rhythm.py` — burstiness score, em dash count, sentence length data |
+| `BRAND_DIR/de-ai-guidelines.md` | Full de-AI rules — your editing standard |
+| `BRAND_DIR/brand-voice-card.md` | Brand voice — ensure revisions stay on-voice |
+| `EDITORIAL_DIR/angle.md` | The approved angle — ensure revisions don't drift from it |
+| `skills/content-standards.md` | Structural standards — check introduction, paragraph length, sentence cap, CTA |
 
 ---
 
 ## Step 1 — Read the audit outputs
 
-**Read `audit-flags.json` fully.**
+**Read `DATA_DIR/audit-flags.json` fully.**
 - HIGH severity flags must all be resolved — no exceptions
 - MEDIUM severity flags should be resolved unless fixing them would damage the sentence more than leaving them
 - Note the exact line numbers and phrases flagged
 
-**Read `rhythm-analysis.json` fully.**
+**Read `DATA_DIR/rhythm-analysis.json` fully.**
 Key metrics to check:
 - `burstiness_score` — target is above 1.2. Below 1.0 means the writing is too uniform.
 - `em_dash_count` — flag if above 4 in a single article
@@ -107,7 +107,7 @@ After resolving all flags and rhythm issues, verify:
 - [ ] Rhythm issues addressed
 - [ ] No new AI patterns introduced during editing
 - [ ] Brand voice maintained — no on-voice sentences broken by edits
-- [ ] Angle from `angle.md` still clear and present
+- [ ] Angle from `EDITORIAL_DIR/angle.md` still clear and present
 - [ ] Word count still within 10% of target
 - [ ] No sentence exceeds 35 words
 - [ ] No paragraph exceeds 5 sentences
@@ -118,7 +118,7 @@ After resolving all flags and rhythm issues, verify:
 
 ## Step 5 — Save the revised draft
 
-Overwrite `draft.md` with the revised content. Update the frontmatter:
+Overwrite `EDITORIAL_DIR/draft.md` with the revised content. Update the frontmatter:
 
 ```markdown
 ---
