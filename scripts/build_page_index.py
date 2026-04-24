@@ -230,7 +230,7 @@ def run(page_index_path: Path, sitemap_url: str, types: list, delay: float) -> b
             }
             print(f"         → {len(result['keyphrases'])} keyphrases, {len(result['headings'])} headings")
         else:
-            print(f"         → skipped (fetch failed)")
+            print("         → skipped (fetch failed)")
 
         if i < len(to_crawl):
             time.sleep(delay)

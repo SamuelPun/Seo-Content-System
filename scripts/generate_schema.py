@@ -5,7 +5,6 @@ import sys
 from datetime import date
 from pathlib import Path
 
-
 SITE_URL = "https://monx.team"
 
 
@@ -24,7 +23,6 @@ def extract_questions(text):
 
 
 def detect_type(text):
-    headings = extract_headings(text)
     questions = extract_questions(text)
     steps = re.findall(r'(?:step\s+\d+|^\d+\.\s)', text, re.IGNORECASE | re.MULTILINE)
 
@@ -80,10 +78,6 @@ def build_faq_schema(questions_text):
 
 def build_howto_schema(title, text):
     steps = []
-    step_matches = re.findall(
-        r'(?:^#{2,3}\s+(?:Step\s+\d+[:\s].+)$)(.*?)(?=^#{2,3}|\Z)',
-        text, re.MULTILINE | re.DOTALL | re.IGNORECASE
-    )
     headings = re.findall(r'^#{2,3}\s+(Step\s+\d+.+)$', text, re.MULTILINE | re.IGNORECASE)
 
     for i, heading in enumerate(headings):
@@ -143,7 +137,7 @@ def run(draft_path, meta_path, out_dir, url=None):
     out_path = out_dir / "schema.json"
     out_path.write_text(json.dumps(schemas, indent=2, ensure_ascii=False), encoding="utf-8")
     print(f"[OK]   {out_path}")
-    print(f"  Article schema:  ✓")
+    print("  Article schema:  ✓")
     print(f"  {schema_type} schema: {'✓' if len(schemas) > 1 else 'not applicable'}")
     return True
 

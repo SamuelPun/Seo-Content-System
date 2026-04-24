@@ -4,7 +4,6 @@ import re
 import sys
 from pathlib import Path
 
-
 TITLE_MIN = 30
 TITLE_MAX = 60
 DESC_MIN  = 100
@@ -64,15 +63,15 @@ def run(draft_path, out_dir, title=None, description=None, url=None):
     out_path = out_dir / "meta.json"
     out_path.write_text(json.dumps(meta, indent=2, ensure_ascii=False), encoding="utf-8")
     print(f"[OK]   {out_path}")
-    print(f"\n=== META VALIDATION ===")
+    print("\n=== META VALIDATION ===")
     print(f"  Title ({title_len} chars): {title[:70]}")
     print(f"  Desc  ({desc_len} chars): {description[:80]}...")
     if flags:
-        print(f"\n  ⚠ FLAGS:")
+        print("\n  ⚠ FLAGS:")
         for f in flags:
             print(f"    - {f}")
     else:
-        print(f"\n  ✓ All checks passed")
+        print("\n  ✓ All checks passed")
     return True
 
 

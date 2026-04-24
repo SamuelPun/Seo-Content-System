@@ -15,7 +15,7 @@ def burstiness(lengths):
     if len(lengths) < 2:
         return 0.0
     mean = sum(lengths) / len(lengths)
-    variance = sum((l - mean) ** 2 for l in lengths) / len(lengths)
+    variance = sum((n - mean) ** 2 for n in lengths) / len(lengths)
     std = variance ** 0.5
     if mean == 0:
         return 0.0
@@ -68,10 +68,10 @@ def run(draft_path, out_dir):
 
     # Distribution buckets
     distribution = {
-        "1_to_10":  sum(1 for l in lengths if l <= 10),
-        "11_to_20": sum(1 for l in lengths if 11 <= l <= 20),
-        "21_to_30": sum(1 for l in lengths if 21 <= l <= 30),
-        "31_plus":  sum(1 for l in lengths if l > 30),
+        "1_to_10":  sum(1 for n in lengths if n <= 10),
+        "11_to_20": sum(1 for n in lengths if 11 <= n <= 20),
+        "21_to_30": sum(1 for n in lengths if 21 <= n <= 30),
+        "31_plus":  sum(1 for n in lengths if n > 30),
     }
 
     result = {
@@ -93,7 +93,7 @@ def run(draft_path, out_dir):
     out_path = out_dir / "rhythm-analysis.json"
     out_path.write_text(json.dumps(result, indent=2), encoding="utf-8")
     print(f"[OK]   {out_path}")
-    print(f"\n=== RHYTHM ANALYSIS ===")
+    print("\n=== RHYTHM ANALYSIS ===")
     print(f"  Sentences:      {result['sentence_count']}")
     print(f"  Mean length:    {result['mean_length']} words")
     print(f"  Range:          {result['min_length']}–{result['max_length']} words")

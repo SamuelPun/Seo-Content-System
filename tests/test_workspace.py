@@ -1,17 +1,18 @@
 """Tests for workspace log I/O and step tracking."""
 
-import json
 from pathlib import Path
 
-import pytest
-
 from seo_system.workspace import (
-    workspace, log_path, load_log, save_log,
-    mark_complete, mark_pending, is_complete,
-    update_content_index, init_article_files, log_step_start, log_step_end,
+    init_article_files,
+    is_complete,
+    load_log,
+    log_path,
+    mark_complete,
+    mark_pending,
+    save_log,
+    update_content_index,
+    workspace,
 )
-from seo_system.config import STEPS
-
 
 # ---------------------------------------------------------------------------
 # Helpers

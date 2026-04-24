@@ -16,13 +16,16 @@ import shutil
 import sys
 
 from seo_system.config import BRAND_TMPL, get_content_base, normalise_slug
-from seo_system.onboard.prompts import ask, confirm, header
-from seo_system.onboard.writers import (
-    write_profile, write_competitors, write_glossary,
-    write_cta_library, write_content_index,
-)
 from seo_system.onboard.claude import generate_claude_files
-from seo_system.onboard.qa import run_qa, build_qa_text
+from seo_system.onboard.prompts import ask, confirm, header
+from seo_system.onboard.qa import build_qa_text, run_qa
+from seo_system.onboard.writers import (
+    write_competitors,
+    write_content_index,
+    write_cta_library,
+    write_glossary,
+    write_profile,
+)
 
 
 def main():
@@ -59,11 +62,16 @@ def main():
     print(f"  ✓ {brand_dir}")
     print(f"  ✓ {content_dir}")
 
-    write_profile(client_dir, data);       print("  ✓ profile.md")
-    write_competitors(brand_dir, data);    print("  ✓ brand/competitors.md")
-    write_glossary(brand_dir, data);       print("  ✓ brand/glossary.md")
-    write_cta_library(brand_dir, data);    print("  ✓ brand/cta-library.md")
-    write_content_index(content_dir);      print("  ✓ content/_index.md")
+    write_profile(client_dir, data)
+    print("  ✓ profile.md")
+    write_competitors(brand_dir, data)
+    print("  ✓ brand/competitors.md")
+    write_glossary(brand_dir, data)
+    print("  ✓ brand/glossary.md")
+    write_cta_library(brand_dir, data)
+    print("  ✓ brand/cta-library.md")
+    write_content_index(content_dir)
+    print("  ✓ content/_index.md")
 
     de_ai_src = BRAND_TMPL / "de-ai-guidelines.md"
     if de_ai_src.exists():
@@ -84,9 +92,9 @@ def main():
     print(f"  Brand folder  : {brand_dir}")
     print()
     print("  Next steps:")
-    print(f"    1. Review brand/brand-voice-card.md — edit anything Claude got wrong")
-    print(f"    2. Review brand/audience-profiles.md — fill any gaps")
-    print(f"    3. Run your first article:")
+    print("    1. Review brand/brand-voice-card.md — edit anything Claude got wrong")
+    print("    2. Review brand/audience-profiles.md — fill any gaps")
+    print("    3. Run your first article:")
     print(f"       python3 run_workflow.py --client {client_slug} --article \"your keyword\" --step all")
     print()
 

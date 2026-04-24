@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from seo_system.onboard.prompts import ask, ask_list, ask_multiline, confirm, header
+from seo_system.onboard.prompts import ask, ask_list, confirm, header
 
 
 def run_qa(client_slug: str) -> dict:

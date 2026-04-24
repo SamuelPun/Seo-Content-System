@@ -18,11 +18,13 @@ Input files are in the DATA_DIR path provided at the top of this prompt.
 | File | What it contains |
 |---|---|
 | `DATA_DIR/serp-urls.json` | The top organic results for the target keyword (URL, domain, title, position) |
-| `DATA_DIR/paa.json` | People Also Ask questions Google is showing for this keyword |
+| `DATA_DIR/paa.json` | People Also Ask questions Google is showing for this keyword. May be empty for long-tail keywords — see below. |
 | `DATA_DIR/serp-pages/1.md` … `DATA_DIR/serp-pages/10.md` | Clean markdown of each ranking page — your competitor analysis source |
 | `DATA_DIR/log.json` | Contains `keyword` field — the exact target keyword |
 
 Read all available serp-pages files before forming any conclusions.
+
+**If `paa.json` is empty** (common for long-tail keywords): do not leave `paa_questions` blank. Instead, derive 3–5 likely reader questions by scanning the headings, subheadings, and FAQ sections in the competitor pages. Use those as your `paa_questions`.
 
 ---
 

@@ -45,6 +45,12 @@ except ImportError:
     sys.exit(1)
 
 try:
+    from ddgs import DDGS
+    _DDG_AVAILABLE = True
+except ImportError:
+    _DDG_AVAILABLE = False
+
+try:
     from dotenv import load_dotenv
     load_dotenv()
 except ImportError:
@@ -102,6 +108,38 @@ def fetch_serp(keyword: str, country: str, top: int, api_key: str) -> list[dict]
 
     data = response.json()
     return data.get("positions", [])
+
+
+# ---------------------------------------------------------------------------
+# DDG fallback
+# ---------------------------------------------------------------------------
+
+def fetch_serp_ddg(keyword: str, top: int) -> list[dict]:
+    """Fetch top organic results via DuckDuckGo when Ahrefs has no data.
+
+    Returns organic-shaped dicts with null SEO metrics and a snippet field.
+    PAA is not available via DDG — callers should write an empty paa.json.
+    """
+    if not _DDG_AVAILABLE:
+        print("ERROR: ddgs is not installed. Run: pip install ddgs", file=sys.stderr)
+        return []
+
+    results = DDGS().text(keyword, max_results=top)
+    organic = []
+    for i, r in enumerate(results or [], start=1):
+        organic.append({
+            "position":      i,
+            "url":           r.get("href"),
+            "title":         r.get("title"),
+            "snippet":       r.get("body"),
+            "domain_rating": None,
+            "url_rating":    None,
+            "traffic":       None,
+            "keywords":      None,
+            "backlinks":     None,
+            "refdomains":    None,
+        })
+    return organic
 
 
 # ---------------------------------------------------------------------------
@@ -200,28 +238,41 @@ def parse_positions(raw: list[dict]) -> tuple[list[dict], list[dict]]:
 # Main
 # ---------------------------------------------------------------------------
 
-def run(keyword: str, country: str, top: int, out_dir: Path, api_key: str) -> bool:
+def run(keyword: str, country: str, top: int, out_dir: Path, api_key: str | None) -> bool:
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    print(f"[INFO] Fetching SERP: '{keyword}' / {country.upper()} / top {top}")
-    raw = fetch_serp(keyword, country, top, api_key)
-    print(f"[INFO] {len(raw)} raw positions returned from API")
+    organic = []
+    paa = []
+    source = "ahrefs"
 
-    organic, paa = parse_positions(raw)
-    print(f"[INFO] {len(organic)} organic results, {len(paa)} PAA questions")
+    if api_key:
+        print(f"[INFO] Fetching SERP via Ahrefs: '{keyword}' / {country.upper()} / top {top}")
+        raw = fetch_serp(keyword, country, top, api_key)
+        print(f"[INFO] {len(raw)} raw positions returned from Ahrefs")
+        organic, paa = parse_positions(raw)
+        print(f"[INFO] {len(organic)} organic results, {len(paa)} PAA questions")
+
+    if not organic:
+        if api_key:
+            print(f"[WARN] Ahrefs returned no organic results for '{keyword}' — falling back to DuckDuckGo")
+        else:
+            print(f"[INFO] No AHREFS_API_KEY — fetching SERP via DuckDuckGo: '{keyword}'")
+        source = "duckduckgo"
+        organic = fetch_serp_ddg(keyword, top)
+        print(f"[INFO] {len(organic)} results from DuckDuckGo (SEO metrics unavailable)")
 
     # Write serp-urls.json
     serp_path = out_dir / "serp-urls.json"
     serp_path.write_text(json.dumps(organic, indent=2, ensure_ascii=False), encoding="utf-8")
     print(f"[OK]   {serp_path}")
 
-    # Write paa.json
+    # Write paa.json (empty when using DDG — long-tail keywords rarely have PAA boxes)
     paa_path = out_dir / "paa.json"
     paa_path.write_text(json.dumps(paa, indent=2, ensure_ascii=False), encoding="utf-8")
     print(f"[OK]   {paa_path}")
 
     # Summary table
-    print("\n=== SERP SUMMARY ===")
+    print(f"\n=== SERP SUMMARY (source: {source}) ===")
     print(f"{'Pos':>3}  {'DR':>4}  {'Traffic':>8}  URL")
     print("-" * 65)
     for r in organic:
@@ -259,8 +310,7 @@ def main():
 
     api_key = os.environ.get("AHREFS_API_KEY")
     if not api_key:
-        print("ERROR: AHREFS_API_KEY not set. Add it to your .env file or shell environment.", file=sys.stderr)
-        sys.exit(1)
+        print("[WARN] AHREFS_API_KEY not set — will use DuckDuckGo fallback.")
 
     ok = run(
         keyword=args.keyword,

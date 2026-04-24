@@ -1,6 +1,5 @@
 import argparse
 import json
-import re
 import sys
 from pathlib import Path
 
@@ -88,7 +87,7 @@ def run(workspace: Path) -> bool:
 
     # Summary
     word_count = len(draft_text.split())
-    print(f"\n=== OUTPUT SUMMARY ===")
+    print("\n=== OUTPUT SUMMARY ===")
     print(f"  Title:       {title}")
     print(f"  URL:         {url}")
     print(f"  Word count:  {word_count}")

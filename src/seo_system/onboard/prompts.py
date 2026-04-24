@@ -45,7 +45,7 @@ def ask_multiline(prompt: str) -> str:
 def ask_list(prompt: str) -> list[str]:
     """Ask for one item per line. Returns list of non-empty strings."""
     raw = ask_multiline(prompt)
-    return [l for l in raw.splitlines() if l.strip()]
+    return [line for line in raw.splitlines() if line.strip()]
 
 
 def confirm(prompt: str) -> bool:

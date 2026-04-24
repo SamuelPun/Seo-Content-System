@@ -13,11 +13,27 @@ Usage:
 import argparse
 import sys
 
-from seo_system.config import STEPS, HUMAN_GATES, normalise_slug, get_content_base, load_client_profile
-from seo_system.workspace import workspace, load_log, save_log, init_article_files, log_step_start, log_step_end, mark_complete, is_complete, update_content_index
-from seo_system.runner import print_status
+from seo_system.config import (
+    HUMAN_GATES,
+    STEPS,
+    get_content_base,
+    load_client_profile,
+    normalise_slug,
+)
 from seo_system.gates import interactive_gate
-from seo_system.steps import RunContext, STEP_RUNNERS
+from seo_system.runner import print_status
+from seo_system.steps import STEP_RUNNERS, RunContext
+from seo_system.workspace import (
+    init_article_files,
+    is_complete,
+    load_log,
+    log_step_end,
+    log_step_start,
+    mark_complete,
+    save_log,
+    update_content_index,
+    workspace,
+)
 
 
 def main():

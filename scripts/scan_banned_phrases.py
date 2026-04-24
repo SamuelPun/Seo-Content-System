@@ -159,16 +159,16 @@ def run(draft_path, out_dir):
     high   = [h for h in hits if h["severity"] == "HIGH"]
     medium = [h for h in hits if h["severity"] == "MEDIUM"]
     print(f"[OK]   {out_path}")
-    print(f"\n=== BANNED PHRASE SCAN ===")
+    print("\n=== BANNED PHRASE SCAN ===")
     print(f"  HIGH severity:   {len(high)}")
     print(f"  MEDIUM severity: {len(medium)}")
     print(f"  Total hits:      {len(hits)}")
     if high:
-        print(f"\n--- HIGH severity hits ---")
+        print("\n--- HIGH severity hits ---")
         for h in high:
             print(f"  Line {h['line_number']:>4}: [{h['phrase']}]  {h['line_text'][:80]}")
     if medium:
-        print(f"\n--- MEDIUM severity hits ---")
+        print("\n--- MEDIUM severity hits ---")
         for h in medium:
             print(f"  Line {h['line_number']:>4}: [{h['phrase']}]  {h['line_text'][:80]}")
     return True
