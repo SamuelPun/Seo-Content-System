@@ -16,6 +16,8 @@ def extract_title(text):
 
 
 def extract_first_paragraph(text):
+    # Strip YAML frontmatter before processing
+    text = re.sub(r'\A---\n.*?\n---\n?', '', text, flags=re.DOTALL)
     text = re.sub(r'^#+.+$', '', text, flags=re.MULTILINE)
     text = re.sub(r'```.*?```', '', text, flags=re.DOTALL)
     paragraphs = [p.strip() for p in text.split('\n\n') if p.strip()]

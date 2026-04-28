@@ -27,7 +27,24 @@ Editorial files are in EDITORIAL_DIR. Data files are in DATA_DIR. Brand files ar
 | `skills/content-devices.md` | Device library — read any device listed in the outline before writing that section |
 | `skills/content-standards.md` | Structural standards — word count, sentence length, paragraph length, headings, links, CTA rules |
 
+Also read `BRAND_DIR/audience-profiles.md` if it exists — use it to calibrate tone and assumed knowledge to the specific reader type this article targets.
+
 Do not begin writing until you have read all of the above.
+
+---
+
+## The advisor frame — apply before you write a word
+
+You are writing as a knowledgeable advisor giving a client the briefing they need. Not a document writer covering a topic for completeness.
+
+The difference:
+- **Advisor:** "Here's the thing most people get wrong about this — and here's what to do instead."
+- **Document:** "This article covers the rules, exemptions, and compliance requirements for X."
+
+The opening sentence should make the reader feel they are already getting something. Use "we" when speaking as the firm. Use "you" and "your" when addressing the reader. The article body informs fully and doesn't sell. The CTA at the end should feel like the reader's natural next step, not a corporate sign-off.
+
+**Bad opening:** "UK withholding tax on payments to foreign companies is a complex area of tax law that affects many businesses..."
+**Good opening:** "Your company is about to transfer money to a foreign parent, lender, or licensor. The question is whether to deduct UK withholding tax before the payment leaves. Get it wrong and HMRC holds the UK company liable."
 
 ---
 

@@ -93,7 +93,12 @@ Write `angle.md` to EDITORIAL_DIR with this structure:
 # Angle — [keyword]
 
 ## Target reader
-One sentence. Who exactly is reading this, and what situation are they in right now?
+Derive this from the keyword and the SERP — the search query and the pages that rank tell you who is searching and what they already know. Do not invent a generic persona; read the evidence.
+
+- **Who they are:** Role, context, situation — as specific as the SERP allows (e.g. "UK finance director processing a cross-border interest payment for the first time", not "a business professional")
+- **What they already know:** The vocabulary they used to search indicates their knowledge level. What can you assume they understand without explanation?
+- **What they are trying to resolve:** The underlying decision or problem — not just the search query. What will they do differently after reading this?
+- **Language and register:** Formal or informal? What words do they use naturally? Any vocabulary the article should mirror?
 
 ## Their core problem
 What does this reader actually need to resolve — not just their search query, but the underlying problem?

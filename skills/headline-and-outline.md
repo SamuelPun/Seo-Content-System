@@ -71,7 +71,28 @@ Write `headline.md` to EDITORIAL_DIR:
 
 ---
 
-## Step 2 — Select content devices
+## Step 2 — Map reader pathways
+
+Before selecting devices or building sections, answer this question from `angle.md`:
+
+**Does this keyword attract meaningfully different reader types with different information needs?**
+
+Check the Target reader section of `angle.md`. If the angle identifies more than one reader type, map each one:
+
+- Who are they?
+- What is their single question?
+- What do they need to read to get their answer?
+- What can they stop reading once they have it?
+
+**If reader types need substantially different information** (their questions diverge, their answers diverge, or the steps they need to take differ): structure the outline around reader types, not topics. Each reader-type section should contain everything that reader needs. Table-stakes topics belong inside the reader-type sections that use them — not as standalone topical sections that every reader must traverse.
+
+**If all readers need the same information in the same order**: proceed with a standard topic-ordered structure.
+
+Write your reader pathway map as a section in `EDITORIAL_DIR/outline.md` (see Step 4 format below).
+
+---
+
+## Step 3 — Select content devices
 
 Read `skills/content-devices.md` in full.
 
@@ -83,22 +104,26 @@ Based on the angle, the target reader, and the topic — select 2–4 devices th
 
 Do not select devices because they sound impressive. Select them because they will produce content this reader cannot get from any ranking page.
 
-Write your selected devices as a section in `EDITORIAL_DIR/outline.md` (see Step 3 format below).
+Write your selected devices as a section in `EDITORIAL_DIR/outline.md` (see Step 4 format below).
 
 ---
 
-## Step 3 — Build the outline
+## Step 4 — Build the outline
 
 The outline is the writer's brief. It must be detailed enough that the writer never has to guess what goes in a section.
 
 **Outline rules:**
-- Structure must match the dominant SERP format from `DATA_DIR/keyword.json`
-- Every table-stakes topic from `DATA_DIR/keyword.json` must appear somewhere
+- If reader pathways diverge (Step 2): structure by reader type, not topic. A reader who found their answer should be able to identify the next section as "not for me" and skip it — signpost this explicitly in section purposes.
+- If reader pathways converge: structure must match the dominant SERP format from `DATA_DIR/keyword.json`
+- Every table-stakes topic from `DATA_DIR/keyword.json` must appear somewhere — but in the section where the relevant reader actually needs it, not as a standalone topical section
 - Every PAA question from `DATA_DIR/keyword.json` must be addressed in a named section or subsection
-- Sections must flow logically — each section earns its place by serving the reader's journey
+- Each section must state which reader type(s) it primarily serves
 - Include a suggested word count per section (total must match `word_count_range` in keyword.json)
 - Flag where external authority sources, data, or expert quotes should go
 - Content devices must be embedded as named sections or subsections — not added as an afterthought
+
+**Redundancy check — run this after drafting all sections:**
+Identify any core fact that appears in more than two sections. If found, consolidate. One explanation, done well, is better than three explanations across different formats. Repetition is not comprehensiveness — it is a signal that the section structure needs merging.
 
 Write `outline.md` to EDITORIAL_DIR:
 
@@ -109,6 +134,18 @@ Write `outline.md` to EDITORIAL_DIR:
 **Target keyword:** [from keyword.json]
 **Angle:** [one sentence from angle.md]
 **Total target word count:** [from keyword.json]
+**Structure type:** [Reader-pathway / Topic-ordered — from Step 2 decision]
+
+---
+
+## Reader pathways
+
+| Reader type | Their question | Sections they need | Can stop after |
+|---|---|---|---|
+| [Reader type 1] | [Their single question] | [Section names] | [Section name] |
+| [Reader type 2] | [Their single question] | [Section names] | [Section name] |
+
+*If only one reader type: note that here and proceed with topic-ordered structure.*
 
 ---
 
@@ -121,8 +158,14 @@ Write `outline.md` to EDITORIAL_DIR:
 
 ---
 
+## Table of contents
+*Include for articles above 2,000 words or with multiple reader pathways. List section headings only — no descriptions. The writer renders this as a linked list in the draft.*
+
+---
+
 ## Introduction (~[N] words)
 **Purpose:** Hook the reader, establish the problem, signal what is different about this article.
+**Serves:** All reader types
 **Key points:**
 - ...
 **Note:** No preamble. First sentence should land the angle immediately.
@@ -131,6 +174,7 @@ Write `outline.md` to EDITORIAL_DIR:
 
 ## [Section heading] (~[N] words)
 **Purpose:** [What this section does for the reader — not just what it covers]
+**Serves:** [Which reader type(s) — be specific. If not all readers, flag: "Readers who [description] can skip this."]
 **Key points:**
 - ...
 - ...
@@ -145,9 +189,10 @@ Write `outline.md` to EDITORIAL_DIR:
 ---
 
 ## Conclusion (~[N] words)
-**Purpose:** Consolidate the angle, give the reader a clear next step.
+**Purpose:** Land one clear action per reader type. Do not summarise what the article already said.
+**Serves:** All reader types
 **Key points:**
-- ...
+- [One action or takeaway per reader type — no more]
 **CTA:** [Specific — what should the reader do next?]
 
 ---
@@ -164,13 +209,16 @@ Write `outline.md` to EDITORIAL_DIR:
 When both files are written, end your session with:
 
 > **Headline options and outline ready.**
+> Structure type: [Reader-pathway / Topic-ordered]
+> Reader types mapped: [list them, or "single reader type"]
 > Sections: [N] — approximately [total word count] words
 > Content devices selected: [list them]
 >
-> Two things to do before pressing Enter:
+> Three things to do before pressing Enter:
 > 1. Open `EDITORIAL_DIR/headline.md` — write your chosen headline in the "Chosen headline" field at the bottom.
-> 2. Open `EDITORIAL_DIR/outline.md` — copy your chosen headline into the **Chosen headline** field at the top. Then review all sections and edit anything before continuing.
+> 2. Open `EDITORIAL_DIR/outline.md` — copy your chosen headline into the **Chosen headline** field at the top.
+> 3. Review the reader pathway map — confirm the sections assigned to each reader type are complete and don't repeat core facts across pathways. If a reader type's sections contain the same core fact twice, consolidate before continuing.
 >
-> The writer works from `EDITORIAL_DIR/outline.md` only. If the headline isn't updated there, the writer won't have it.
+> The writer works from `EDITORIAL_DIR/outline.md` only. Changes made here are the last chance to fix structure before the draft is written.
 >
 > Press Enter in the terminal when both files are updated and you're happy with the outline.
