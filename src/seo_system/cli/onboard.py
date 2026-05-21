@@ -16,7 +16,7 @@ import shutil
 import sys
 
 from seo_system.config import BRAND_TMPL, get_content_base, normalise_slug
-from seo_system.onboard.claude import generate_claude_files, generate_voice_dna
+from seo_system.onboard.claude import generate_claude_files, generate_content_prefs, generate_voice_dna
 from seo_system.onboard.prompts import ask, confirm, header
 from seo_system.onboard.qa import build_qa_text, run_qa
 from seo_system.onboard.scraper import fetch_posts_for_voice_analysis
@@ -102,7 +102,9 @@ def main():
         print("  Skipped — voice-dna.md can be generated later by re-running with --voice-dna")
 
     header("Generating brand voice files with Claude")
-    generate_claude_files(brand_dir, build_qa_text(data), data["name"])
+    qa_text = build_qa_text(data)
+    generate_claude_files(brand_dir, qa_text, data["name"])
+    generate_content_prefs(brand_dir, qa_text, data["name"])
 
     print()
     print("  ┌─────────────────────────────────────────────────┐")
@@ -115,7 +117,8 @@ def main():
     print("  Next steps:")
     print("    1. Review brand/brand-voice-card.md — edit anything Claude got wrong")
     print("    2. Review brand/audience-profiles.md — fill any gaps")
-    print("    3. Run your first article:")
+    print("    3. Review brand/content-prefs.md — confirm format and headline preferences")
+    print("    4. Run your first article:")
     print(f"       python3 run_workflow.py --client {client_slug} --article \"your keyword\" --step all")
     print()
 
