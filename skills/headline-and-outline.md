@@ -27,6 +27,7 @@ Editorial files are in EDITORIAL_DIR. Data files are in DATA_DIR. `skills/` file
 | `DATA_DIR/serp-urls.json` | Competitor titles — for headline differentiation |
 | `skills/content-devices.md` | Library of original content devices — read this fully before building the outline |
 | `BRAND_DIR/audience-profiles.md` | Reader segments with emotional triggers and frustrations — read if it exists; use in Step 2 |
+| `BRAND_DIR/content-prefs.md` | Structural and format preferences — read if it exists; use in Steps 1 and 4 |
 
 Read `angle.md` and `content-devices.md` fully before writing anything. Every headline and every outline section must serve the angle.
 
@@ -43,6 +44,8 @@ Produce 5 headline options — **one of each type below.** These are not five wo
 | **3. Counterintuitive or surprising** | The thing that sounds wrong but is true once you understand it. Generates genuine curiosity, not just clicks. |
 | **4. Specificity hook** | A number, threshold, date, or named detail in the title. Signals this is a real article, not a generic guide. |
 | **5. Outcome-first** | Leads with what the reader will be able to do, decide, or avoid after reading. |
+
+If `BRAND_DIR/content-prefs.md` exists, check **Headline preferences** — use the preferred types and tone as the starting point when selecting which of the five variants to favour.
 
 Rules for all five:
 - Include the target keyword naturally (front-loaded where possible)
@@ -138,6 +141,7 @@ The outline is the writer's brief. It must be detailed enough that the writer ne
 **Outline rules:**
 - If reader pathways diverge (Step 2): structure by reader type, not topic. A reader who found their answer should be able to identify the next section as "not for me" and skip it — signpost this explicitly in section purposes.
 - If reader pathways converge: structure must match the dominant SERP format from `DATA_DIR/keyword.json`
+- If `BRAND_DIR/content-prefs.md` exists: cross-reference **Structural defaults** — if the client never uses listicles, do not propose a listicle structure even if the SERP favours it; if they prefer reader-pathway structure when segments diverge, apply that here
 - Every table-stakes topic from `DATA_DIR/keyword.json` must appear somewhere — but in the section where the relevant reader actually needs it, not as a standalone topical section
 - Every PAA question from `DATA_DIR/keyword.json` must be addressed in a named section or subsection
 - Each section must state which reader type(s) it primarily serves
