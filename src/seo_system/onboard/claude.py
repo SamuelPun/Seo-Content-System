@@ -277,7 +277,19 @@ def generate_voice_dna(brand_dir: Path, posts: list[dict], client_name: str):
         (brand_dir / "voice-dna.md").write_text(content + "\n", encoding="utf-8")
         print("  ✓ voice-dna.md written")
     else:
-        print("  ✗ Claude failed — voice-dna.md not generated")
+        print("  ✗ Claude failed — writing placeholder voice-dna.md")
+        (brand_dir / "voice-dna.md").write_text(
+            f"# Voice DNA — {client_name}\n\n"
+            "*Claude was not available — fill in manually from your published articles.*\n\n"
+            "## Opening patterns\n\n"
+            "## Sentence rhythm\n\n"
+            "## Editorial asides\n\n"
+            "## Teaching moves\n\n"
+            "## Opinion and position\n\n"
+            "## Signature vocabulary\n\n"
+            "## What this writing never does\n",
+            encoding="utf-8",
+        )
 
 
 def generate_claude_files(brand_dir: Path, qa_text: str, client_name: str):

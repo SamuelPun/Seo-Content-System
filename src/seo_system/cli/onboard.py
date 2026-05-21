@@ -99,7 +99,7 @@ def main():
         else:
             print("  ✗ No posts extracted — skipping Voice DNA")
     else:
-        print("  Skipped — voice-dna.md can be generated later by re-running with --voice-dna")
+        print("  Skipped — voice-dna.md can be generated later by re-running onboarding and answering 'yes' to the Voice DNA prompt.")
 
     header("Generating brand voice files with Claude")
     qa_text = build_qa_text(data)
