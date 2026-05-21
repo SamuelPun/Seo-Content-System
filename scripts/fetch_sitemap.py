@@ -54,25 +54,9 @@ def fetch_xml(url: str) -> ET.Element:
     return ET.fromstring(response.content)
 
 
-def get_child_sitemaps(index_url: str, types: list) -> list:
-    """
-    Fetch the sitemap index and return child sitemap URLs matching
-    the requested types (e.g. 'post' matches 'post-sitemap.xml').
-    """
-    root = fetch_xml(index_url)
-    matches = []
-    for sitemap in root.findall("sm:sitemap", NS):
-        loc = sitemap.findtext("sm:loc", namespaces=NS) or ""
-        for t in types:
-            if f"{t}-sitemap.xml" in loc:
-                matches.append(loc)
-                break
-    return matches
 
-
-def parse_child_sitemap(url: str) -> list:
-    """Fetch a child sitemap and return list of {url, lastmod} dicts."""
-    root = fetch_xml(url)
+def parse_urlset(root: ET.Element) -> list:
+    """Extract {url, lastmod} entries from a <urlset> element."""
     entries = []
     for url_el in root.findall("sm:url", NS):
         loc     = url_el.findtext("sm:loc",     namespaces=NS)
@@ -85,6 +69,11 @@ def parse_child_sitemap(url: str) -> list:
     return entries
 
 
+def parse_child_sitemap(url: str) -> list:
+    """Fetch a child sitemap URL and return list of {url, lastmod} dicts."""
+    return parse_urlset(fetch_xml(url))
+
+
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
@@ -94,20 +83,34 @@ def run(out_dir: Path, types: list, sitemap_url: str = None) -> bool:
 
     index_url = sitemap_url or SITEMAP_INDEX
     print(f"[INFO] Fetching sitemap index: {index_url}")
-    child_urls = get_child_sitemaps(index_url, types)
+    root = fetch_xml(index_url)
 
-    if not child_urls:
-        print(f"ERROR: No child sitemaps found for types: {types}", file=sys.stderr)
-        return False
+    # Detect flat sitemap (urlset) vs sitemap index (sitemapindex)
+    tag = root.tag.split("}")[-1] if "}" in root.tag else root.tag
+    if tag == "urlset":
+        print("[INFO] Flat sitemap detected — reading URLs directly")
+        all_entries = parse_urlset(root)
+    else:
+        child_urls = []
+        for sitemap in root.findall("sm:sitemap", NS):
+            loc = sitemap.findtext("sm:loc", namespaces=NS) or ""
+            for t in types:
+                if f"{t}-sitemap.xml" in loc:
+                    child_urls.append(loc)
+                    break
 
-    print(f"[INFO] Found {len(child_urls)} child sitemap(s): {[u.split('/')[-1] for u in child_urls]}")
+        if not child_urls:
+            print(f"ERROR: No child sitemaps found for types: {types}", file=sys.stderr)
+            return False
 
-    all_entries = []
-    for child_url in child_urls:
-        print(f"[FETCH] {child_url}")
-        entries = parse_child_sitemap(child_url)
-        print(f"[OK]   {len(entries)} URLs")
-        all_entries.extend(entries)
+        print(f"[INFO] Found {len(child_urls)} child sitemap(s): {[u.split('/')[-1] for u in child_urls]}")
+
+        all_entries = []
+        for child_url in child_urls:
+            print(f"[FETCH] {child_url}")
+            entries = parse_child_sitemap(child_url)
+            print(f"[OK]   {len(entries)} URLs")
+            all_entries.extend(entries)
 
     # Deduplicate by URL
     seen = set()

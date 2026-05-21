@@ -16,9 +16,10 @@ import shutil
 import sys
 
 from seo_system.config import BRAND_TMPL, get_content_base, normalise_slug
-from seo_system.onboard.claude import generate_claude_files
+from seo_system.onboard.claude import generate_claude_files, generate_voice_dna
 from seo_system.onboard.prompts import ask, confirm, header
 from seo_system.onboard.qa import build_qa_text, run_qa
+from seo_system.onboard.scraper import fetch_posts_for_voice_analysis
 from seo_system.onboard.writers import (
     write_competitors,
     write_content_index,
@@ -79,6 +80,26 @@ def main():
         print("  ✓ brand/de-ai-guidelines.md (copied from repo)")
     else:
         print("  ✗ de-ai-guidelines.md not found in repo brand/ — copy manually")
+
+    header("Voice DNA — analyse existing blog posts")
+    sitemap_url = data.get("sitemap_url", "")
+    if sitemap_url and confirm(
+        "Fetch existing blog posts to extract Voice DNA? (recommended if the client has published content)"
+    ):
+        max_posts = 20
+        print(f"\n  Fetching up to {max_posts} posts from {sitemap_url}...\n")
+        try:
+            posts = fetch_posts_for_voice_analysis(sitemap_url, max_posts=max_posts)
+        except Exception as exc:
+            print(f"  ✗ Could not fetch posts: {exc}")
+            posts = []
+        if posts:
+            print(f"\n  ✓ {len(posts)} posts extracted")
+            generate_voice_dna(brand_dir, posts, data["name"])
+        else:
+            print("  ✗ No posts extracted — skipping Voice DNA")
+    else:
+        print("  Skipped — voice-dna.md can be generated later by re-running with --voice-dna")
 
     header("Generating brand voice files with Claude")
     generate_claude_files(brand_dir, build_qa_text(data), data["name"])

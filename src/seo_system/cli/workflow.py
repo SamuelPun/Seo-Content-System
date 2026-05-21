@@ -122,7 +122,7 @@ def main():
         update_content_index(content_dir)
         print_status(f"{step} — done", "ok")
 
-        if step in HUMAN_GATES and steps_to_run.index(step) < len(steps_to_run) - 1:
+        if step in HUMAN_GATES:
             interactive_gate(step, ws)
 
     print()

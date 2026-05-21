@@ -1,3 +1,8 @@
+---
+name: research-authority
+description: "Step 5 — sources venue details, practitioner quotes, statistics, and editorial authority signals."
+---
+
 # Skill: Research & Authority
 *Step 5 of the SEO Content System*
 
@@ -53,6 +58,24 @@ Avoid:
 - Sources without a clear author or publication date
 - Statistics with no original source linked
 - Anything more than 3 years old unless it is definitional or historical
+
+**If `source_strategy` in `outline.md` frontmatter includes `lifestyle`**, expand the acceptable source pool with a lifestyle editorial tier:
+
+- Named-author pieces in recognisable editorial publications (NYT, The Guardian, Vogue, GQ, Bon Appétit, Wired, Monocle, and equivalents)
+- Established specialist editorial brands with clear editorial standards (Healthline, Well+Good, Wine Folly, Serious Eats, The Spruce Eats, and equivalents)
+- Expert practitioner content with a named author, a stated domain credential, and a recognisable publication or personal brand with an editorial track record
+
+Quality criteria apply regardless of source type:
+- Named author with a byline history or stated credential
+- Publication date visible
+- URL likely to remain stable (avoid aggregators, slideshows, AMP pages)
+- Link-worthy: a reader would consider this publication credible for this specific claim
+
+Still avoid even in lifestyle mode:
+- Unnamed or uncredentialled blog posts
+- Content farm articles (eHow, generic listicle sites without named authors)
+- Social media posts — acceptable to reference in prose, not to cite as a source
+- Press releases unless citing the release itself as the record of an announcement
 
 For each source, read the relevant section carefully. Extract only what is directly useful.
 

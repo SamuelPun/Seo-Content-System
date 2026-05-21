@@ -1,3 +1,8 @@
+---
+name: keyword-and-angle
+description: "Steps 1-2 — SERP analysis, differentiated angle, and keyword intent mapping. Writes keyword.json and angle.md."
+---
+
 # Skill: Keyword & Angle
 *Steps 1–2 of the SEO Content System*
 
@@ -21,6 +26,7 @@ Input files are in the DATA_DIR path provided at the top of this prompt.
 | `DATA_DIR/paa.json` | People Also Ask questions Google is showing for this keyword. May be empty for long-tail keywords — see below. |
 | `DATA_DIR/serp-pages/1.md` … `DATA_DIR/serp-pages/10.md` | Clean markdown of each ranking page — your competitor analysis source |
 | `DATA_DIR/log.json` | Contains `keyword` field — the exact target keyword |
+| `BRAND_DIR/audience-profiles.md` | Client's reader segments with trust signals, bounce triggers, and content frustrations — read if it exists |
 
 Read all available serp-pages files before forming any conclusions.
 
@@ -29,6 +35,18 @@ Read all available serp-pages files before forming any conclusions.
 ---
 
 ## Step 1 — Analyse the SERP
+
+### Preliminary source check — do this before forming any conclusions
+
+Find 2–3 primary sources (government body, regulatory authority, academic paper, official industry publication) relevant to this keyword. Scan them quickly. Note:
+
+- Any fact that ranking pages state incorrectly or imprecisely
+- Any finding the primary source contains that no competitor page mentions
+- Any data or ruling that reframes how the topic should be understood
+
+These are *knowledge gaps* — higher-value angle material than anything the SERP analysis produces. If you find one, build the angle around it. A positioning gap ("nobody covers X") is adequate. A knowledge gap ("competitors say X but the authoritative source says Y") is excellent.
+
+---
 
 Work through these questions. Think carefully before writing anything.
 
@@ -51,6 +69,7 @@ Work through these questions. Think carefully before writing anything.
 **Authority signals:**
 - What credentials, data sources, or trust signals do the top pages use?
 - What would make a reader trust one page over another?
+- If `BRAND_DIR/audience-profiles.md` exists: cross-reference — what does this client's specific reader consider credible vs. dismissible? That is your trust bar, not the SERP average.
 
 ---
 
@@ -92,12 +111,25 @@ Write `angle.md` to EDITORIAL_DIR with this structure:
 ```markdown
 # Angle — [keyword]
 
+## The insight
+Complete this sentence before anything else:
+*"After reading this article, the reader will understand something they didn't know before: ___________"*
+
+This must be specific and non-obvious. "They will understand how UK withholding tax works" is not an insight — it is a topic. "They will understand that the 20% default rate almost never applies because most countries have a treaty reducing it to zero, but HMRC will hold the UK payer liable if they get it wrong" is an insight.
+
+If you cannot complete this sentence with something genuinely informative, the angle is not yet sharp enough. Do not proceed to the outline until this is answered.
+
+---
+
 ## Target reader
 Derive this from the keyword and the SERP — the search query and the pages that rank tell you who is searching and what they already know. Do not invent a generic persona; read the evidence.
+
+If `BRAND_DIR/audience-profiles.md` exists: identify which profile best matches this keyword's intent and anchor the definition there. The profile's trust signals, bounce triggers, and content frustrations are more specific than anything the SERP can tell you — use them.
 
 - **Who they are:** Role, context, situation — as specific as the SERP allows (e.g. "UK finance director processing a cross-border interest payment for the first time", not "a business professional")
 - **What they already know:** The vocabulary they used to search indicates their knowledge level. What can you assume they understand without explanation?
 - **What they are trying to resolve:** The underlying decision or problem — not just the search query. What will they do differently after reading this?
+- **What makes them trust or dismiss this article:** What signals credibility to this specific reader? What would make them close the tab in the first 30 seconds? (Use `audience-profiles.md` if available; infer from SERP if not.)
 - **Language and register:** Formal or informal? What words do they use naturally? Any vocabulary the article should mirror?
 
 ## Their core problem

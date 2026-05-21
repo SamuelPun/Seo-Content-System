@@ -39,6 +39,39 @@ def run_qa(client_slug: str) -> dict:
         default="Explain on first use",
     )
     data["extra_voice_notes"] = ask("Anything else about their voice or writing style? (Enter to skip):")
+    data["opening_pattern"] = ask(
+        "How do they typically open a piece? Describe the pattern or give an example first sentence:"
+    )
+    data["opinion_style"] = ask(
+        "Do they take strong positions or hedge? How opinionated are they?"
+    )
+    data["teaching_style"] = ask(
+        "How do they explain complex things — analogies, worked examples, direct assertion, comparisons?"
+    )
+    data["editorial_asides"] = ask(
+        "Does this brand inject brief informal opinion phrases mid-article — 'honestly', 'frankly', "
+        "'let's be honest'? If yes, give 1-2 examples of how they'd sound in a sentence "
+        "(Enter to skip):"
+    )
+    data["howto_format"] = ask(
+        "For step-by-step content (how-to guides, planning pieces), does the brand prefer numbered "
+        "steps or flowing prose?",
+        default="Numbered steps with short active labels",
+    )
+    data["preferred_formats"] = ask(
+        "What content formats work best for their audience? (e.g. guides, listicles, comparisons, "
+        "news-style) — list them:",
+        default="Guides",
+    )
+    data["article_depth"] = ask(
+        "Preferred article depth? (e.g. concise 1000-1500 words / standard 1500-2500 / "
+        "in-depth 2500+):",
+        default="Standard (1500-2500 words)",
+    )
+    data["structural_defaults"] = ask(
+        "Any structural rules — e.g. 'no listicles', 'tables for data only', 'always use "
+        "comparison sections'? (Enter to skip):"
+    )
 
     header("PART 4 — Audience")
     print("  Describe who reads their content.\n")
@@ -52,6 +85,15 @@ def run_qa(client_slug: str) -> dict:
         segment["situation"] = ask(f"  [{segment_name}] What just happened that brought them to this topic?")
         segment["anxiety"] = ask(f"  [{segment_name}] What are they confused or anxious about?")
         segment["success"] = ask(f"  [{segment_name}] What does a successful article do for them?")
+        segment["trust_signals"] = ask(
+            f"  [{segment_name}] What makes them trust a source vs. dismiss it as AI slop?"
+        )
+        segment["bounce_triggers"] = ask(
+            f"  [{segment_name}] What would make them close the tab in the first 30 seconds?"
+        )
+        segment["content_frustrations"] = ask(
+            f"  [{segment_name}] What frustrates them about other content on this topic?"
+        )
         data["audience_segments"].append(segment)
 
     header("PART 5 — Competitors and trusted domains")
@@ -112,6 +154,9 @@ Segment: {seg['name']}
 - Their situation: {seg['situation']}
 - Their anxiety: {seg['anxiety']}
 - What a successful article does: {seg['success']}
+- What makes them trust a source: {seg.get('trust_signals', '')}
+- What makes them bounce: {seg.get('bounce_triggers', '')}
+- What frustrates them about existing content: {seg.get('content_frustrations', '')}
 """
 
     return f"""
@@ -127,6 +172,14 @@ Things they never do: {'; '.join(data.get('voice_never', []))}
 What makes them different: {data.get('differentiator', '')}
 Jargon policy: {data.get('jargon_policy', '')}
 Additional voice notes: {data.get('extra_voice_notes', '')}
+Opening pattern: {data.get('opening_pattern', '')}
+Opinion style: {data.get('opinion_style', '')}
+Teaching style: {data.get('teaching_style', '')}
+Editorial asides: {data.get('editorial_asides', '')}
+How-to content format: {data.get('howto_format', '')}
+Preferred content formats: {data.get('preferred_formats', '')}
+Article depth: {data.get('article_depth', '')}
+Structural defaults: {data.get('structural_defaults', '')}
 
 Audience segments:
 {segments_text}

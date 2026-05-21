@@ -45,6 +45,31 @@ The card must have these exact sections (use this structure):
 
 ---
 
+## Opening pattern
+[1-2 sentences describing how pieces typically open. Not a principle — a pattern. E.g. "Opens by placing the reader in their specific situation before naming the topic."]
+
+---
+
+## Teaching style
+[1-2 sentences. How does this brand explain complex things — direct assertion, worked examples, analogies, comparisons? What's the default move?]
+
+---
+
+## Opinion handling
+[1-2 sentences. Does this brand commit to positions or hedge? How opinionated is it, and how does that show up in the writing?]
+
+---
+
+## Editorial asides
+[Does this brand inject short informal opinion sentences at decision points — "honestly", "frankly", "let's be honest"? Describe when these appear (at a key decision, a surprising fact, a moment of validation) and what form they take. If this brand doesn't use editorial asides, say so explicitly.]
+
+---
+
+## How-to content format
+[For step-by-step content, does this brand use numbered steps with short active headers, or flowing prose with descriptive section headers? Which register is more natural to their voice?]
+
+---
+
 ## The one thing
 [One sentence. What should every piece of content leave the reader feeling?]
 
@@ -80,6 +105,15 @@ this structure exactly:
 **What a successful article does for them:**
 [1-2 sentences — what they leave knowing or feeling]
 
+**What makes them trust a source:**
+[1-2 sentences — what signals credibility to this reader; what makes them dismiss content as generic or AI-generated]
+
+**What makes them bounce:**
+[1-2 sentences — what would make them close the tab in the first 30 seconds]
+
+**What frustrates them about other content on this topic:**
+[1-2 sentences — what existing content gets wrong; the gap this brand can fill]
+
 ---
 
 Start the file with:
@@ -95,6 +129,73 @@ CLIENT Q&A
 """
 
 
+VOICE_DNA_PROMPT = """\
+You are a voice and style analyst. Read the article excerpts below and extract the writing DNA \
+of this brand.
+
+Your job is to observe patterns — not to describe what the brand claims to be, but what the \
+writing actually does. Base every observation on evidence from the articles. If you cannot find \
+clear evidence for something, say so rather than inventing a pattern.
+
+Output ONLY the voice-dna.md file content. No preamble, no explanation outside the file.
+
+Structure the file exactly as follows:
+
+# Voice DNA — {client_name}
+*Derived from analysis of {post_count} published articles. Observed patterns, not stated \
+principles — edit if anything is wrong.*
+
+---
+
+## Opening patterns
+[How do articles typically open? Describe the move — e.g. "Places the reader in their specific \
+situation before naming the topic." Include 1-2 short direct examples quoted from the articles.]
+
+---
+
+## Sentence rhythm
+[What is the sentence length pattern? Short bursts, long explanatory sentences, or mixed? \
+What is the dominant register? Cite a short passage as evidence.]
+
+---
+
+## Editorial asides
+[Do short informal opinion injections appear — "Honestly", "Frankly", "Let's be honest"? If so, \
+quote an example. Note what triggers them — a key decision point, a surprising fact, a validation \
+moment. If none appear in the articles, state that explicitly.]
+
+---
+
+## Teaching moves
+[When this brand explains something complex, what do they do — direct assertion, worked example, \
+analogy, comparison? Include a short quoted example of each pattern you observe.]
+
+---
+
+## Opinion and position
+[Does this brand commit to positions or hedge? When they have a take, how is it signalled? \
+Quote a short example of a strong position if you find one.]
+
+---
+
+## Signature vocabulary
+[Words, phrases, or constructions that recur or feel distinctly theirs — not industry jargon, \
+but the choices that reveal personality. List with brief notes on how each is used.]
+
+---
+
+## What this writing never does
+[Observed absences — things you would expect to see in generic content on these topics that this \
+brand consistently avoids. Be specific: "never opens with a rhetorical question", not "avoids clichés".]
+
+---
+
+ARTICLES
+========
+{articles_text}
+"""
+
+
 def call_claude(prompt: str) -> str | None:
     """Run Claude in print mode and return stdout."""
     result = subprocess.run(
@@ -106,6 +207,24 @@ def call_claude(prompt: str) -> str | None:
     if result.returncode != 0:
         return None
     return result.stdout.strip()
+
+
+def generate_voice_dna(brand_dir: Path, posts: list[dict], client_name: str):
+    articles_text = "\n\n---\n\n".join(
+        f"URL: {p['url']}\n\n{p['text']}" for p in posts
+    )
+    prompt = VOICE_DNA_PROMPT.format(
+        client_name=client_name,
+        post_count=len(posts),
+        articles_text=articles_text,
+    )
+    print(f"  → Analysing {len(posts)} posts with Claude to extract Voice DNA...")
+    content = call_claude(prompt)
+    if content:
+        (brand_dir / "voice-dna.md").write_text(content + "\n", encoding="utf-8")
+        print("  ✓ voice-dna.md written")
+    else:
+        print("  ✗ Claude failed — voice-dna.md not generated")
 
 
 def generate_claude_files(brand_dir: Path, qa_text: str, client_name: str):

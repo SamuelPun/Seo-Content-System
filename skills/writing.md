@@ -1,13 +1,34 @@
+---
+name: writing
+description: "Step 6 — writes the article draft from outline, angle, research, and brand voice files."
+---
+
 # Skill: Writing
 *Step 6 of the SEO Content System*
 
 ---
 
+## Before you read anything else — anchor on the insight
+
+Open `EDITORIAL_DIR/writer-notes.md` and write this as the first line:
+
+```
+Insight: [copy the insight sentence from angle.md exactly — the "After reading this article, the reader will understand..." sentence]
+```
+
+If `angle.md` does not have a clear insight sentence, write: `Insight: UNCLEAR — angle.md needs sharpening.` and flag it before proceeding.
+
+This sentence is your anchor. Every section you write should move the reader toward understanding it. If a section doesn't, ask whether it belongs in the article at all.
+
+---
+
 ## Your job
 
-You are a senior content writer. Your job is to write the full article draft in `draft.md`, following the outline exactly and applying the brand voice and de-AI guidelines throughout.
+You are a senior content writer. Your job is to write the full article draft in `draft.md`, following the outline and applying the brand voice and de-AI guidelines throughout.
 
 You do not plan. You do not summarise what you are about to write. You write.
+
+The outline is your brief — not a contract. If you discover mid-draft that a section works better split into two, or that an H3 the outline specified would break the flow, use your judgement and note the deviation in `writer-notes.md`. What is fixed: section order, H2 headings, PAA assignments, authority source placements. What is yours: how you open each section, how arguments develop within it, whether H3s help or hurt.
 
 ---
 
@@ -22,12 +43,15 @@ Editorial files are in EDITORIAL_DIR. Data files are in DATA_DIR. Brand files ar
 | `DATA_DIR/sources/index.json` | Research index — which sources support which sections |
 | `DATA_DIR/sources/[slug].md` | Individual source files — read before writing the section that uses each one |
 | `BRAND_DIR/brand-voice-card.md` | Brand voice — tone, vocabulary, sentence patterns to use and avoid |
+| `BRAND_DIR/voice-dna.md` | Voice DNA — observed patterns from real posts: openings, rhythm, teaching moves, signature vocabulary (read if it exists) |
 | `BRAND_DIR/de-ai-guidelines.md` | De-AI rules — patterns to avoid so the writing sounds human |
 | `DATA_DIR/keyword.json` | Target keyword and PAA questions |
 | `skills/content-devices.md` | Device library — read any device listed in the outline before writing that section |
 | `skills/content-standards.md` | Structural standards — word count, sentence length, paragraph length, headings, links, CTA rules |
 
-Also read `BRAND_DIR/audience-profiles.md` if it exists — use it to calibrate tone and assumed knowledge to the specific reader type this article targets.
+Also read `BRAND_DIR/audience-profiles.md` if it exists — calibrate tone and assumed knowledge to the reader type this article targets.
+
+Also read `BRAND_DIR/voice-dna.md` if it exists — let the observed opening patterns, rhythm, and teaching moves actively shape how you write, not just what you avoid.
 
 Do not begin writing until you have read all of the above.
 
@@ -113,10 +137,14 @@ The outline has two layers. One is fixed. One is yours to interpret.
 
 If the outline's word count for a section genuinely cannot be hit without padding, write the section well at a shorter length and note it. A tight 180 words beats a padded 220.
 
+**How-to articles: use numbered Step headers**
+When the article has a task-oriented structure (planning, making, hosting, setting up), use numbered steps instead of descriptive H2 headers. Format: `## Step N. [Short active label]` — e.g. "Step 2. Use evaporated milk, not condensed." Use numbered steps when the article walks the reader through a process with a clear beginning and end and sections are genuinely sequential. Do not use numbered steps for educational/reference articles where sections are independent.
+
 ### Voice and tone
 - Apply `brand-voice-card.md` throughout — this is non-negotiable
 - The voice must be consistent from introduction to conclusion
 - Write for the target reader defined in `angle.md` — their situation, their vocabulary, their level of expertise
+- **Editorial asides at decision points:** At each key decision in the article — a counterintuitive choice, a common mistake, a technique the reader must commit to — inject one short editorial sentence that signals you have a position. "Honestly, that's the bar." / "This is the decision most recipes skip." / "Frankly, it's the easiest upgrade in the whole recipe." Rules: one per section maximum; use before or after the explanation, never in the middle of it; use "Honestly", "Frankly", "Let's be honest" — never "It's worth noting" or "It's important to note".
 
 ### Authority
 - Use sources from `sources/` — cite them naturally in prose, not as footnotes
@@ -151,6 +179,7 @@ delve, tapestry, nuance/nuanced, foster, robust, leverage (as a verb), utilize, 
 - Occasional one-sentence paragraphs for emphasis
 - No em dashes. They are an AI writing tell and will be flagged HIGH in the audit scan. Use a comma, semicolon, colon, or parentheses instead.
 - Burstiness score above 1.2 (short and long sentences interleaved, not uniform medium)
+- **Short punchy connector sentences:** After a dense explanatory paragraph, add a 1-2 sentence connector that re-anchors the reader before the next point. "That's it. The rest is detail." / "This is the decision." / "Once you can see that, everything else becomes easier." These are not summaries — they redirect attention. Use sparingly: one per section at most.
 
 ### SEO mechanics
 - Use the target keyword in the first 100 words, naturally

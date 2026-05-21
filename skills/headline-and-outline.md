@@ -1,3 +1,8 @@
+---
+name: headline-and-outline
+description: "Steps 3-4 — generates headline options and full article outline with content devices, word counts, and reader pathways."
+---
+
 # Skill: Headline & Outline
 *Steps 3–4 of the SEO Content System*
 
@@ -21,6 +26,7 @@ Editorial files are in EDITORIAL_DIR. Data files are in DATA_DIR. `skills/` file
 | `DATA_DIR/keyword.json` | Target keyword, intent, format, word count range, table stakes, PAA questions |
 | `DATA_DIR/serp-urls.json` | Competitor titles — for headline differentiation |
 | `skills/content-devices.md` | Library of original content devices — read this fully before building the outline |
+| `BRAND_DIR/audience-profiles.md` | Reader segments with emotional triggers and frustrations — read if it exists; use in Step 2 |
 
 Read `angle.md` and `content-devices.md` fully before writing anything. Every headline and every outline section must serve the angle.
 
@@ -28,37 +34,46 @@ Read `angle.md` and `content-devices.md` fully before writing anything. Every he
 
 ## Step 1 — Write headlines
 
-Produce 5 headline options. Each must:
-- Include the target keyword naturally (front-loaded where possible)
-- Be specific — no vague promises ("The Ultimate Guide to…" is not specific)
-- Signal the angle — a reader skimming Google results should feel this is different
-- Be under 65 characters (Yoast / Google title tag limit)
-- Not duplicate the framing of any top-3 competitor title
+Produce 5 headline options — **one of each type below.** These are not five wordings of the same idea. They are five genuinely different ways to attack the angle. A reader should look at all five and see distinct value propositions.
 
-For each headline, write one sentence explaining what it prioritises and what it trades off.
+| Type | What it does |
+|---|---|
+| **1. Keyword-forward, value-explicit** | States the topic + the specific value the reader gets. Best for readers searching this exact term already. |
+| **2. Problem-first** | Leads with the reader's situation, mistake, or pain. The headline speaks to the reader before naming the topic. |
+| **3. Counterintuitive or surprising** | The thing that sounds wrong but is true once you understand it. Generates genuine curiosity, not just clicks. |
+| **4. Specificity hook** | A number, threshold, date, or named detail in the title. Signals this is a real article, not a generic guide. |
+| **5. Outcome-first** | Leads with what the reader will be able to do, decide, or avoid after reading. |
+
+Rules for all five:
+- Include the target keyword naturally (front-loaded where possible)
+- Under 65 characters (Yoast / Google title tag limit)
+- Not duplicating the framing of any top-3 competitor title
+- Write a one-sentence trade-off note for each
+
+If the topic or angle genuinely prevents one type (e.g. no counterintuitive angle exists), use the closest approximation and note why. **Producing five variants of Type 1 is a failure of this step.**
 
 Write `headline.md` to EDITORIAL_DIR:
 
 ```markdown
 # Headline options — [keyword]
 
-## Option 1
+## Option 1 — Keyword-forward, value-explicit
 [Headline text]
 *Prioritises / trades off:*
 
-## Option 2
+## Option 2 — Problem-first
 [Headline text]
 *Prioritises / trades off:*
 
-## Option 3
+## Option 3 — Counterintuitive or surprising
 [Headline text]
 *Prioritises / trades off:*
 
-## Option 4
+## Option 4 — Specificity hook
 [Headline text]
 *Prioritises / trades off:*
 
-## Option 5
+## Option 5 — Outcome-first
 [Headline text]
 *Prioritises / trades off:*
 
@@ -77,7 +92,7 @@ Before selecting devices or building sections, answer this question from `angle.
 
 **Does this keyword attract meaningfully different reader types with different information needs?**
 
-Check the Target reader section of `angle.md`. If the angle identifies more than one reader type, map each one:
+Check the Target reader section of `angle.md`. If `BRAND_DIR/audience-profiles.md` exists, cross-reference it — the profiles may reveal pathway distinctions (different situations, different questions, different stopping points) that the SERP alone would not surface. If the angle identifies more than one reader type, map each one:
 
 - Who are they?
 - What is their single question?
@@ -104,7 +119,15 @@ Based on the angle, the target reader, and the topic — select 2–4 devices th
 
 Do not select devices because they sound impressive. Select them because they will produce content this reader cannot get from any ranking page.
 
-Write your selected devices as a section in `EDITORIAL_DIR/outline.md` (see Step 4 format below).
+**For each device you select, write an execution sketch before moving to the outline:**
+
+- What is the specific scenario, character, or example this device will use in *this* article?
+- What specific numbers, thresholds, or concrete details will appear?
+- What is the key moment or insight the device should deliver to the reader?
+
+These sketches go below the device selection table. The writer reads them before writing the device section. Vague device selection ("Fiction Character Walkthrough — because it makes the topic relatable") without a sketch produces thin execution. A sketch like "Character: UK Ltd company director discovering a cross-border interest payment is overdue. Numbers: £85,000 payment, 20% WHT = £17,000 exposure. Key moment: realising the treaty route could have reduced this to zero" produces a real section.
+
+Write your selected devices and their sketches as a section in `EDITORIAL_DIR/outline.md` (see Step 4 format below).
 
 ---
 
@@ -156,6 +179,12 @@ Write `outline.md` to EDITORIAL_DIR:
 | [Device name] | [One sentence] | [Section name or position] |
 | [Device name] | [One sentence] | [Section name or position] |
 
+**Execution sketches:**
+
+*[Device name]:* Scenario/character: [specific]. Numbers/details: [specific]. Key moment: [what the reader understands at the end of this device section].
+
+*[Device name]:* Scenario/character: [specific]. Numbers/details: [specific]. Key moment: [what the reader understands at the end of this device section].
+
 ---
 
 ## Table of contents
@@ -197,9 +226,6 @@ Write `outline.md` to EDITORIAL_DIR:
 
 ---
 
-## Authority sources needed
-- [What kind of source, for which section]
-- ...
 ```
 
 ---
@@ -214,10 +240,14 @@ When both files are written, end your session with:
 > Sections: [N] — approximately [total word count] words
 > Content devices selected: [list them]
 >
-> Three things to do before pressing Enter:
+> Four things to do before pressing Enter:
 > 1. Open `EDITORIAL_DIR/headline.md` — write your chosen headline in the "Chosen headline" field at the bottom.
 > 2. Open `EDITORIAL_DIR/outline.md` — copy your chosen headline into the **Chosen headline** field at the top.
 > 3. Review the reader pathway map — confirm the sections assigned to each reader type are complete and don't repeat core facts across pathways. If a reader type's sections contain the same core fact twice, consolidate before continuing.
+> 4. Set the source strategy. Add a `source_strategy` field to the `outline.md` frontmatter and choose one:
+>    - `evidence` — article makes factual claims requiring verifiable citations: medical dosing, legal rules, financial regulations, safety claims. Academic, government, and regulatory sources are the default.
+>    - `lifestyle` — article is advisory, experiential, or cultural: recipes, wellness practices, travel, fashion, gift guides. Quality editorial sources (named-author magazine pieces, specialist editorial brands) are as valid as academic ones.
+>    - `lifestyle+evidence` — article does both (e.g. a wellness piece that also cites pharmacology). Expands the source pool without restricting the primary tier.
 >
 > The writer works from `EDITORIAL_DIR/outline.md` only. Changes made here are the last chance to fix structure before the draft is written.
 >

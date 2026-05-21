@@ -1,5 +1,18 @@
+---
+name: audit
+description: "Step 8 — mechanical cleanup: banned phrases, rhythm, sentence length. Runs scan_banned_phrases.py and analyse_rhythm.py then resolves all flags."
+---
+
 # Skill: Audit
-*Step 7 of the SEO Content System*
+*Step 8 of the SEO Content System — runs after the revision step*
+
+---
+
+## Scope
+
+This step runs after revision. The draft has already been editorially reviewed, improved, and approved by the human. Your job is **mechanical cleanup only** — banned phrases, rhythm, structural standards.
+
+Do not make editorial judgments here. Do not rewrite sections because they feel thin or weak — that was revision's job. If you notice an editorial problem the revision step missed, note it in `work-log.md` and move on. Do not fix it yourself.
 
 ---
 
@@ -36,8 +49,27 @@ Editorial files are in EDITORIAL_DIR. Data files are in DATA_DIR. Brand files ar
 | `DATA_DIR/rhythm-analysis.json` | Output of `analyse_rhythm.py` — burstiness score, em dash count, sentence length data |
 | `BRAND_DIR/de-ai-guidelines.md` | Full de-AI rules — your editing standard |
 | `BRAND_DIR/brand-voice-card.md` | Brand voice — ensure revisions stay on-voice |
+| `BRAND_DIR/voice-dna.md` | Observed opening and rhythm patterns — reference when rewriting flagged sentences to ensure edits stay consistent with real post style (read if it exists) |
 | `EDITORIAL_DIR/angle.md` | The approved angle — ensure revisions don't drift from it |
 | `skills/content-standards.md` | Structural standards — check introduction, paragraph length, sentence cap, CTA |
+
+---
+
+## Step 0 — Run the audit scripts
+
+Run both scripts before reading any outputs. Both require `--draft` and `--out-dir` as named arguments.
+
+```bash
+python3 scripts/scan_banned_phrases.py \
+    --draft "EDITORIAL_DIR/draft.md" \
+    --out-dir "DATA_DIR"
+
+python3 scripts/analyse_rhythm.py \
+    --draft "EDITORIAL_DIR/draft.md" \
+    --out-dir "DATA_DIR"
+```
+
+Substitute the actual paths for `EDITORIAL_DIR` and `DATA_DIR`. Both scripts write their output files directly to `DATA_DIR` — read those files in Step 1.
 
 ---
 
@@ -51,7 +83,7 @@ Editorial files are in EDITORIAL_DIR. Data files are in DATA_DIR. Brand files ar
 **Read `DATA_DIR/rhythm-analysis.json` fully.**
 Key metrics to check:
 - `burstiness_score` — target is above 1.2. Below 1.0 means the writing is too uniform.
-- `em_dash_count` — flag if above 4 in a single article
+- `em_dash_count` — must be zero. Any em dash is a HIGH severity flag.
 - `mean_length` — flag if above 22 words
 - `uniform_runs` — runs of 3+ same-length sentences need breaking up
 
@@ -68,6 +100,16 @@ For each flag:
 4. Verify the rewrite sounds natural and stays on-voice
 
 **If fixing a phrase requires restructuring the idea — not just swapping a word — make the minimum change necessary and add a comment on the next line: `<!-- SUBSTANCE NOTE: [what changed and why] -->`. This flags it for human review without blocking the audit.**
+
+**Flags that require sentence-level rewrites (em dashes and similar):**
+
+Do not attempt to rewrite these in the audit step. Flag each occurrence with an inline HTML comment and stop — the revision step owns the rewrite:
+
+```
+<!-- AUDIT FLAG: em dash — sentence needs rewriting in revision -->
+```
+
+Place the comment on the line immediately after the flagged sentence. Do not touch the sentence itself.
 
 **Common fixes:**
 
@@ -154,6 +196,14 @@ step: audit | [timestamp] | status: [complete | partial | error]
 - Anything that needs editorial judgment, not just rule application
 
 Do not duplicate what is already in audit-flags.json or rhythm-analysis.json. If the script caught it, the script recorded it. Writer notes are for what falls through.
+
+---
+
+## When re-audit is required
+
+After revision addresses the flags, a re-audit is **not** required if the revision was surgical — only the flagged lines were changed.
+
+A re-audit **is** required if revision went beyond the flags: rewrote unflagged sections, added new content, or made structural changes. The revision-notes.md will say "Re-audit needed: yes" if this happened.
 
 ---
 

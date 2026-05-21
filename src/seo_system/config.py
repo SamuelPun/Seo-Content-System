@@ -35,8 +35,8 @@ STEPS = [
     "headline-outline",  # fetch_sitemap + Claude Code session → headline.md, outline.md
     "research",          # fetch_url (sources) → sources/
     "writing",           # Claude Code session → draft.md
-    "audit",             # scan_banned_phrases + analyse_rhythm + Claude Code → draft.md revised
-    "revision",          # Human + Claude Code session → draft.md final
+    "revision",          # Claude Code session → editorial pass, active fixes → draft.md improved
+    "audit",             # scan_banned_phrases + analyse_rhythm + Claude Code → mechanical cleanup only
     "links",             # build_page_index (incremental) + match_internal_links → candidates.json
     "output",            # validate_meta + generate_schema + build_output → final.html
 ]

@@ -85,7 +85,7 @@ def run(draft_path, out_dir):
         "uniform_runs":     uniform_runs[:10],  # cap at 10 for readability
         "flags": {
             "low_burstiness":    burst < 0.4,
-            "em_dash_overuse":   em_dash_count > 2,
+            "em_dash_overuse":   em_dash_count > 0,
             "no_short_sentences": distribution["1_to_10"] == 0,
         }
     }
