@@ -27,6 +27,7 @@ Input files are in the DATA_DIR path provided at the top of this prompt.
 | `DATA_DIR/serp-pages/1.md` … `DATA_DIR/serp-pages/10.md` | Clean markdown of each ranking page — your competitor analysis source |
 | `DATA_DIR/log.json` | Contains `keyword` field — the exact target keyword |
 | `BRAND_DIR/audience-profiles.md` | Client's reader segments with trust signals, bounce triggers, and content frustrations — read if it exists |
+| `BRAND_DIR/content-prefs.md` | Structural and format preferences — read if it exists; use when assessing dominant format fit |
 
 Read all available serp-pages files before forming any conclusions.
 
@@ -53,6 +54,7 @@ Work through these questions. Think carefully before writing anything.
 **Intent and format:**
 - What is the dominant intent? (informational / navigational / commercial / transactional)
 - What content format dominates? (guide, listicle, tool page, comparison, news)
+- If `BRAND_DIR/content-prefs.md` exists: note whether the dominant SERP format conflicts with the client's preferred formats — flag any conflict in the angle so the outline step can resolve it
 - What word count range do ranking pages fall into?
 - Are there featured snippets or PAA boxes? What questions do they answer?
 
