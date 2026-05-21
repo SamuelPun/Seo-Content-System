@@ -129,6 +129,59 @@ CLIENT Q&A
 """
 
 
+CONTENT_PREFS_PROMPT = """\
+You are a content strategist. Based on the client Q&A below, write a content preferences \
+reference file for a content team. This file is read by skills before generating headlines, \
+outlines, and keyword strategies — it records structural and format preferences so every \
+article feels consistent with this brand's publishing approach.
+
+Output ONLY the content-prefs.md file content. No preamble, no explanation outside the file.
+
+Structure the file exactly as follows:
+
+# Content Preferences — {client_name}
+*Generated from onboarding data. Edit if anything is wrong.*
+
+---
+
+## Preferred content formats
+[Which formats suit this brand and audience — guides, comparisons, listicles, news-style, \
+tool/calculator pages? For each format mentioned, note when to use it and when to avoid it.]
+
+---
+
+## Article depth and length
+[Short and targeted (1000–1500 words) / Standard (1500–2500) / In-depth (2500+)? \
+Is there a strong preference or does it depend on topic complexity?]
+
+---
+
+## Structural defaults
+- **How-to content:** [numbered steps with short labels / flowing prose with descriptive headers]
+- **Lists and tables:** [use freely / restrict to data-heavy sections / avoid]
+- **Comparison sections:** [include by default / include when competitors differ / avoid]
+- **Reader pathways:** [single reader per article / structure by reader type when segments diverge]
+
+---
+
+## Headline preferences
+- **Preferred types:** [e.g. problem-first, outcome-first, specificity hook — list in priority order]
+- **Tone:** [direct and informational / curious / authoritative / conversational]
+- **Length:** [under 55 characters / under 65 characters]
+
+---
+
+## What this client never publishes
+[Format or structural patterns this brand avoids — e.g. no pure listicles, no click-bait \
+headlines, no "10 things" framing.]
+
+---
+
+CLIENT Q&A
+==========
+{qa_text}
+"""
+
 VOICE_DNA_PROMPT = """\
 You are a voice and style analyst. Read the article excerpts below and extract the writing DNA \
 of this brand.
@@ -260,5 +313,28 @@ def generate_claude_files(brand_dir: Path, qa_text: str, client_name: str):
             "## Profile 1 — [Name]\n\n**Who they are:**\n\n**Their situation right now:**\n\n"
             "**What they know already:**\n\n**What they are confused or anxious about:**\n\n"
             "**What a successful article does for them:**\n",
+            encoding="utf-8",
+        )
+
+
+def generate_content_prefs(brand_dir: Path, qa_text: str, client_name: str):
+    print("  → Generating content-prefs.md with Claude...")
+    content = call_claude(CONTENT_PREFS_PROMPT.format(
+        client_name=client_name,
+        qa_text=qa_text,
+    ))
+    if content:
+        (brand_dir / "content-prefs.md").write_text(content + "\n", encoding="utf-8")
+        print("  ✓ content-prefs.md written")
+    else:
+        print("  ✗ Claude failed — writing placeholder content-prefs.md")
+        (brand_dir / "content-prefs.md").write_text(
+            f"# Content Preferences — {client_name}\n\n"
+            "*Generated from onboarding Q&A — Claude was not available. Fill in manually.*\n\n"
+            "## Preferred content formats\n\n"
+            "## Article depth and length\n\n"
+            "## Structural defaults\n\n"
+            "## Headline preferences\n\n"
+            "## What this client never publishes\n",
             encoding="utf-8",
         )
