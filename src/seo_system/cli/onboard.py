@@ -16,7 +16,8 @@ import shutil
 import sys
 
 from seo_system.config import BRAND_TMPL, get_content_base, normalise_slug
-from seo_system.onboard.claude import generate_claude_files, generate_content_prefs, generate_voice_dna
+from seo_system.onboard.claude import generate_claude_files, generate_content_prefs, generate_voice_dna, generate_website_summary
+from seo_system.onboard.website_research import fetch_website_pages
 from seo_system.onboard.prompts import ask, confirm, header
 from seo_system.onboard.qa import build_qa_text, run_qa
 from seo_system.onboard.scraper import fetch_posts_for_voice_analysis
@@ -81,6 +82,22 @@ def main():
     else:
         print("  ✗ de-ai-guidelines.md not found in repo brand/ — copy manually")
 
+    header("Website research — homepage and about page")
+    website_summary_text = ""
+    website_url = data.get("website", "")
+    if website_url and confirm("Fetch homepage and about page to give Claude real context? (recommended)"):
+        print(f"\n  Fetching pages from {website_url}...\n")
+        pages = fetch_website_pages(website_url)
+        if pages:
+            print(f"\n  ✓ {len(pages)} page(s) fetched")
+            result = generate_website_summary(brand_dir, pages, data["name"])
+            if result:
+                website_summary_text = result
+        else:
+            print("  ✗ Could not fetch pages — skipping")
+    else:
+        print("  Skipped.")
+
     header("Voice DNA — analyse existing blog posts")
     sitemap_url = data.get("sitemap_url", "")
     if sitemap_url and confirm(
@@ -103,6 +120,8 @@ def main():
 
     header("Generating brand voice files with Claude")
     qa_text = build_qa_text(data)
+    if website_summary_text:
+        qa_text += f"\n\nWEBSITE RESEARCH (from live pages)\n===================================\n{website_summary_text}"
     generate_claude_files(brand_dir, qa_text, data["name"])
     generate_content_prefs(brand_dir, qa_text, data["name"])
 

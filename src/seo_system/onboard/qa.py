@@ -104,9 +104,9 @@ def run_qa(client_slug: str) -> dict:
         "Other domains to avoid linking to (one per line) — Enter to skip:"
     )
     print()
-    print("  Default trusted domains: gov.uk, irs.gov, hmrc.gov.uk")
-    extra_trusted = ask_list("Additional trusted domains to add (one per line) — Enter to skip:")
-    data["trusted_domains"] = ["gov.uk", "irs.gov", "hmrc.gov.uk"] + extra_trusted
+    data["trusted_domains"] = ask_list(
+        "Trusted domains to link to (one per line, e.g. gov.uk, irs.gov) — Enter to skip:"
+    )
 
     header("PART 6 — Glossary")
     print("  Technical terms that need a brief explanation on first use.\n")

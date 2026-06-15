@@ -59,7 +59,7 @@ def write_competitors(brand_dir: Path, data: dict):
 
     trusted_rows = "\n".join(
         f"| {d} | |" for d in data.get("trusted_domains", [])
-    ) or "| gov.uk | UK government |\n| irs.gov | US IRS |\n| hmrc.gov.uk | HMRC |"
+    ) or "| | |"
 
     text = f"""# Competitors — {data['client_name']}
 

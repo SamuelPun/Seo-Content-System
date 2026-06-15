@@ -101,9 +101,24 @@ example. Then another short one.
 - Read the draft aloud. Where you pause unnaturally, the rhythm is AI.
 
 **The em dash problem:**
-AI overuses em dashes — often in every paragraph — as a way of adding mid-sentence
-commentary. Limit to one per page maximum. When you see an em dash, ask whether
-the thought it introduces should be its own sentence instead.
+Em dashes are one of the strongest AI detection signals. Use zero em dashes in
+published content. Every em dash must be resolved before a draft can be finalised.
+
+When rewriting an em dash, identify what it is doing in the sentence and restructure
+accordingly — do not simply swap in a comma or colon:
+
+- **Parenthetical aside** (`X — detail — continues`): Ask whether the aside earns its
+  place. If yes, restructure as a relative clause (`X, which [detail], continues`) or
+  pull it out as its own sentence. If no, cut it.
+- **Dramatic pause or contrast** (`claim — punchline`): Split into two sentences. Let
+  the second carry the weight on its own.
+- **Inline definition** (`term — what it means`): Rephrase as a subordinate clause:
+  `term, which means...`
+- **Clarification after a quote** (`"quote" — explanation`): Start a new sentence.
+  `"Quote." The explanation follows.`
+
+The rewritten sentence must read naturally with no punctuation patch. If it still
+feels awkward, rewrite the whole sentence from scratch.
 
 ---
 
@@ -206,7 +221,7 @@ LEVEL 1 — VOCABULARY
 LEVEL 2 — RHYTHM
 □ Highlight every sentence. Note the length distribution.
 □ Flag any sequence of more than 3 sentences that are similar in length
-□ Count em dashes — more than 2 in the piece is too many
+□ Count em dashes — any em dash is a flag (zero tolerance)
 □ Flag transitional sentences that exist only to connect, not to say something
 
 LEVEL 3 — STRUCTURE

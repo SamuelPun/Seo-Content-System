@@ -60,6 +60,14 @@ def step_keyword(ctx: RunContext, article: str) -> bool:
         if not ok:
             print_status(f"fetch_url failed for URL {i} — skipping (partial SERP data)", "error")
 
+    ok = run_script("summarise_serp_pages.py", [
+        "--serp-pages-dir", str(serp_pages_dir),
+        "--out-dir",        str(data_dir),
+    ])
+    if not ok:
+        print_status("summarise_serp_pages failed — serp-summaries.json not created", "error")
+        return False
+
     return True
 
 
@@ -77,14 +85,24 @@ def step_headline_outline(ctx: RunContext, article: str) -> bool:
 
     data_dir = ws / "data"
     data_dir.mkdir(parents=True, exist_ok=True)
-    sitemap_args = ["--out-dir", str(data_dir)]
-    if ctx.sitemap_url:
-        sitemap_args += ["--sitemap-url", ctx.sitemap_url]
 
-    ok = run_script("fetch_sitemap.py", sitemap_args)
-    if not ok:
-        print_status("fetch_sitemap failed — sitemap-candidates.json will be missing; links step will fail", "error")
-        return False
+    page_index = ctx.brand_dir / "page-index.json"
+    if page_index.exists():
+        index = json.loads(page_index.read_text(encoding="utf-8"))
+        candidates = [{"url": p["url"], "lastmod": p.get("lastmod")} for p in index.get("pages", [])]
+        (data_dir / "sitemap-candidates.json").write_text(
+            json.dumps(candidates, indent=2), encoding="utf-8"
+        )
+        print_status(f"sitemap-candidates built from brand/page-index.json ({len(candidates)} pages)", "ok")
+    else:
+        sitemap_args = ["--out-dir", str(data_dir)]
+        if ctx.sitemap_url:
+            sitemap_args += ["--sitemap-url", ctx.sitemap_url]
+        ok = run_script("fetch_sitemap.py", sitemap_args)
+        if not ok:
+            print_status("fetch_sitemap failed — sitemap-candidates.json will be missing; links step will fail", "error")
+            return False
+
     return run_claude_skill("headline-and-outline.md", ws, ctx.brand_dir, seed=seed or None)
 
 
@@ -116,12 +134,53 @@ def step_research(ctx: RunContext, article: str) -> bool:
     return True
 
 
+def _validate_banned_phrases(ws: Path, data_dir: Path) -> bool:
+    """Hard gate: run scan_banned_phrases and fail if any HIGH severity flags remain."""
+    draft = ws / "editorial" / "draft.md"
+    if not draft.exists():
+        print_status("draft.md not found — cannot validate banned phrases", "error")
+        return False
+
+    ok = run_script("scan_banned_phrases.py", ["--draft", str(draft), "--out-dir", str(data_dir)])
+    if not ok:
+        print_status("scan_banned_phrases failed", "error")
+        return False
+
+    flags_path = data_dir / "audit-flags.json"
+    if not flags_path.exists():
+        return True
+
+    try:
+        flags_data = json.loads(flags_path.read_text(encoding="utf-8"))
+        high = [f for f in flags_data.get("flags", []) if f.get("severity") == "HIGH"]
+        if high:
+            lines = "\n".join(
+                f"  Line {f.get('line', '?')}: {f.get('phrase', '?')!r}"
+                for f in high
+            )
+            print_status(
+                f"{len(high)} HIGH severity violation(s) in draft — fix before continuing:\n{lines}",
+                "error",
+            )
+            return False
+    except (json.JSONDecodeError, KeyError):
+        pass
+
+    return True
+
+
 def step_writing(ctx: RunContext, article: str) -> bool:
     ws = workspace(ctx.content_dir, article)
-    return run_claude_skill("writing.md", ws, ctx.brand_dir)
+    data_dir = ws / "data"
+    data_dir.mkdir(parents=True, exist_ok=True)
+
+    ok = run_claude_skill("writing.md", ws, ctx.brand_dir)
+    if not ok:
+        return False
+    return _validate_banned_phrases(ws, data_dir)
 
 
-def step_audit(ctx: RunContext, article: str) -> bool:
+def step_polish(ctx: RunContext, article: str) -> bool:
     ws = workspace(ctx.content_dir, article)
     draft = ws / "editorial" / "draft.md"
     data_dir = ws / "data"
@@ -141,12 +200,10 @@ def step_audit(ctx: RunContext, article: str) -> bool:
         print_status("analyse_rhythm failed — rhythm-analysis.json not created", "error")
         return False
 
-    return run_claude_skill("audit.md", ws, ctx.brand_dir)
-
-
-def step_revision(ctx: RunContext, article: str) -> bool:
-    ws = workspace(ctx.content_dir, article)
-    return run_claude_skill("revision.md", ws, ctx.brand_dir)
+    ok = run_claude_skill("polish.md", ws, ctx.brand_dir)
+    if not ok:
+        return False
+    return _validate_banned_phrases(ws, data_dir)
 
 
 def step_links(ctx: RunContext, article: str) -> bool:
@@ -189,10 +246,6 @@ def step_output(ctx: RunContext, article: str) -> bool:
         print_status("editorial/draft.md not found", "error")
         return False
 
-    ok = run_claude_skill("output.md", ws, ctx.brand_dir)
-    if not ok:
-        return False
-
     ok = run_script("validate_meta.py", ["--draft", str(draft), "--out-dir", str(data_dir)])
     if not ok:
         return False
@@ -205,7 +258,11 @@ def step_output(ctx: RunContext, article: str) -> bool:
     if not ok:
         return False
 
-    return run_script("build_output.py", ["--workspace", str(ws)])
+    ok = run_script("build_output.py", ["--workspace", str(ws)])
+    if not ok:
+        return False
+
+    return run_script("generate_checklist.py", ["--workspace", str(ws)])
 
 
 STEP_RUNNERS: dict[str, callable] = {
@@ -214,8 +271,7 @@ STEP_RUNNERS: dict[str, callable] = {
     "headline-outline": step_headline_outline,
     "research":         step_research,
     "writing":          step_writing,
-    "audit":            step_audit,
-    "revision":         step_revision,
+    "polish":           step_polish,
     "links":            step_links,
     "output":           step_output,
 }

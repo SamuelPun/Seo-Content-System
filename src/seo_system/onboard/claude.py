@@ -329,6 +329,62 @@ def generate_claude_files(brand_dir: Path, qa_text: str, client_name: str):
         )
 
 
+WEBSITE_CONTEXT_PROMPT = """\
+You are a brand analyst. Read the homepage and about-page text below from a client's live website.
+Extract concrete, factual information about this business. Base every point on what is actually
+written — do not invent or infer beyond the text.
+
+Output ONLY the website-summary.md file content. No preamble, no explanation outside the file.
+
+Structure the file exactly as follows:
+
+# Website Summary — {client_name}
+*Extracted from live website pages. Used to give context for brand file generation.*
+
+---
+
+## Services and offerings
+[List each service, product, or offering mentioned. Use the exact names from the website. One item
+per line. If pricing or tiers are mentioned, note them.]
+
+---
+
+## Key people
+[Names, roles, and any biographical details mentioned. If no names are given, state "None mentioned".]
+
+---
+
+## Brand positioning
+[Taglines, stated values, differentiators, and any claims about what makes this business different.
+Quote directly where possible.]
+
+---
+
+## Tone signals from the copy
+[Note the actual register of the writing — formal/informal, technical/accessible, warm/authoritative.
+Quote 1-2 short phrases that best capture the brand's voice as it appears on the site.]
+
+---
+
+WEBSITE PAGES
+=============
+{pages_text}
+"""
+
+
+def generate_website_summary(brand_dir: Path, pages: list[dict], client_name: str) -> str | None:
+    pages_text = "\n\n---\n\n".join(f"URL: {p['url']}\n\n{p['text']}" for p in pages)
+    prompt = WEBSITE_CONTEXT_PROMPT.format(client_name=client_name, pages_text=pages_text)
+    print("  → Analysing website pages with Claude...")
+    content = call_claude(prompt)
+    if content:
+        (brand_dir / "website-summary.md").write_text(content + "\n", encoding="utf-8")
+        print("  ✓ website-summary.md written")
+        return content
+    print("  ✗ Claude failed — skipping website-summary.md")
+    return None
+
+
 def generate_content_prefs(brand_dir: Path, qa_text: str, client_name: str):
     print("  → Generating content-prefs.md with Claude...")
     content = call_claude(CONTENT_PREFS_PROMPT.format(

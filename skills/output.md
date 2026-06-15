@@ -10,15 +10,13 @@ description: "Steps 9-10 — generates meta.json, schema.json, internal-link-can
 
 ## Your job
 
-You are a technical content publisher. Your job is to review the final output package — meta tags, schema markup, internal link recommendations, and the assembled HTML — and confirm everything is correct and publish-ready before handing off to the human editor for WordPress upload.
+You are a technical content publisher. Review the final output package — meta tags, schema markup, internal link recommendations, and the assembled HTML — and confirm everything is correct and publish-ready.
 
-You do not rewrite the article. You verify, flag issues, and produce a clear publish checklist.
+You do not rewrite the article. You verify, fix issues, and produce a publish checklist.
 
 ---
 
 ## Inputs — read all of these
-
-Publish files are in PUBLISH_DIR. Data files are in DATA_DIR. Editorial files are in EDITORIAL_DIR.
 
 | File | What it contains |
 |---|---|
@@ -40,7 +38,7 @@ Read `DATA_DIR/meta.json`. Check:
 **SEO title:**
 - [ ] Contains the target keyword
 - [ ] Under 65 characters
-- [ ] Not duplicated from a competitor title (cross-check with `DATA_DIR/serp-urls.json` if available)
+- [ ] Not duplicated from a competitor title (cross-check `serp-urls.json`)
 - [ ] Matches the chosen headline or is a clear SEO variant of it
 - [ ] No clickbait or misleading framing
 
@@ -48,7 +46,7 @@ Read `DATA_DIR/meta.json`. Check:
 - [ ] Between 140–160 characters
 - [ ] Contains the target keyword naturally
 - [ ] Describes what the reader will get — not generic ("Read our guide to...")
-- [ ] Has a clear value proposition or call to action
+- [ ] Has a clear value proposition
 
 If either fails, write the corrected version directly into `DATA_DIR/meta.json` and note what you changed.
 
@@ -58,25 +56,24 @@ If either fails, write the corrected version directly into `DATA_DIR/meta.json` 
 
 Read `DATA_DIR/schema.json`. Check:
 
-**Article schema:**
+**Article schema (always present):**
 - [ ] `headline` matches the SEO title
-- [ ] `datePublished` is present and correctly formatted (ISO 8601)
+- [ ] `datePublished` is present and ISO 8601 formatted
 - [ ] `author` is present with a `name` field
 - [ ] `publisher` is present with `name` and `logo`
 - [ ] `description` matches the meta description
 
 **FAQ schema (if present):**
 - [ ] Every question corresponds to a PAA question or H3 in the article
-- [ ] Every answer is a direct, factual response — not a teaser
-- [ ] No question is answered with "It depends" or a redirect
-- [ ] Answers are under 300 characters where possible (Google truncates longer answers)
+- [ ] Every answer is a direct, factual response — not a teaser or redirect
+- [ ] Answers are under 300 characters where possible
 
 **HowTo schema (if present):**
 - [ ] Steps match the article content exactly
 - [ ] Each step has a `name` and `text`
 - [ ] Steps are in logical order
 
-Flag any schema issues with: `[SCHEMA ISSUE: description]`
+Flag any issues with: `[SCHEMA ISSUE: description]`
 
 ---
 
@@ -84,12 +81,11 @@ Flag any schema issues with: `[SCHEMA ISSUE: description]`
 
 Read `DATA_DIR/internal-link-candidates.json`. For each recommended link:
 
-- [ ] The anchor text reads naturally in the sentence it appears in
-- [ ] The target URL is relevant to the anchor text and the surrounding content
-- [ ] The link adds value for the reader — not forced
-- [ ] No more than 4–5 internal links in a single article (avoid over-linking)
+- [ ] The anchor text reads naturally in context
+- [ ] The target URL is relevant to the anchor text and surrounding content
+- [ ] No more than 4–5 internal links total (avoid over-linking)
 
-Flag any links that feel forced or irrelevant. Recommend removing them rather than keeping weak links.
+Flag any links that feel forced or irrelevant — recommend removing them.
 
 ---
 
@@ -100,28 +96,19 @@ Read `PUBLISH_DIR/final.html`. Check:
 **Structure:**
 - [ ] H1 matches the chosen headline exactly (only one H1)
 - [ ] H2s match the outline section headings
-- [ ] H3s are used correctly for subsections (not skipped levels)
-- [ ] No heading tags used for non-heading content (e.g. pull quotes)
+- [ ] No heading tags used for non-heading content
+- [ ] `<title>` and `<meta name="description">` inside `<head>` match `meta.json`
+- [ ] Schema JSON-LD block is present in `<head>` and is valid JSON
 
 **Content integrity:**
-- [ ] All sections from `EDITORIAL_DIR/draft.md` are present in the HTML
-- [ ] No content truncated or missing
+- [ ] All sections from `draft.md` are present — nothing truncated or missing
 - [ ] All source citations are present and correctly linked
 - [ ] No `[SOURCE NEEDED]` placeholders left in the content
 
-**Schema injection:**
-- [ ] Schema JSON-LD block is present in the `<head>`
-- [ ] Schema is valid JSON (check for unclosed brackets, missing commas)
-
-**Meta tags in HTML:**
-- [ ] `<title>` tag matches `DATA_DIR/meta.json` SEO title
-- [ ] `<meta name="description">` matches `DATA_DIR/meta.json` description
-- [ ] Both are inside `<head>`
-
 **Technical:**
 - [ ] No broken image `src` attributes
-- [ ] No empty `href` values on links
-- [ ] HTML is well-formed (tags closed, no obvious malformed markup)
+- [ ] No empty `href` values
+- [ ] HTML is well-formed (tags closed, no malformed markup)
 
 ---
 
@@ -141,8 +128,7 @@ Write `publish-checklist.md` to PUBLISH_DIR:
 - [x] final.html: clean and complete
 
 ## Issues to resolve before publishing
-- [ ] [Issue 1 — what it is and what to do]
-- [ ] [Issue 2]
+- [ ] [Issue and what to do — or delete this section if none]
 
 ## WordPress upload steps
 1. Create new post in WordPress
@@ -164,8 +150,6 @@ Write `publish-checklist.md` to PUBLISH_DIR:
 ---
 
 ## End of session
-
-When the checklist is written, end your session with:
 
 > **Output verified. Ready for publish.**
 >

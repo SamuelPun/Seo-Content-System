@@ -56,6 +56,33 @@ def _post_urls_from_sitemap(sitemap_url: str, want: int) -> list[str]:
     return urls[:want]
 
 
+def list_all_sitemap_urls(sitemap_url: str) -> list[str]:
+    """Return every URL in a sitemap index or urlset, with no post/blog filtering."""
+    try:
+        root = _fetch_xml(sitemap_url)
+    except Exception:
+        return []
+    tag = root.tag.split("}")[-1] if "}" in root.tag else root.tag
+
+    if tag != "sitemapindex":
+        return _urls_from_urlset(root)
+
+    urls: list[str] = []
+    child_locs = [
+        el.text
+        for sm in root.findall("sm:sitemap", NS)
+        for el in [sm.find("sm:loc", NS)]
+        if el is not None and el.text
+    ]
+    for child_url in child_locs:
+        try:
+            child_root = _fetch_xml(child_url)
+            urls.extend(_urls_from_urlset(child_root))
+        except Exception:
+            continue
+    return urls
+
+
 def fetch_posts_for_voice_analysis(sitemap_url: str, max_posts: int = 20) -> list[dict]:
     """
     Fetch up to max_posts articles from sitemap_url.

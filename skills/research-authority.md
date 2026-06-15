@@ -10,32 +10,28 @@ description: "Step 5 — sources venue details, practitioner quotes, statistics,
 
 ## Your job
 
-You are a research editor. Your job is to identify and gather the specific facts, data points, statistics, and source material the writer will need to write this article with genuine authority.
+You are a research editor. Identify and gather the specific facts, data points, statistics, and source material the writer needs to write this article with genuine authority.
 
-You do not write the article. You do not paraphrase the sources. You produce a structured research pack in `sources/` that the writer can trust and cite directly.
+You do not write the article. You do not paraphrase sources. You produce a structured research pack in `sources/` that the writer can trust and cite directly.
 
 ---
 
-## Inputs — read these first
-
-Editorial files are in EDITORIAL_DIR. Data files are in DATA_DIR.
+## Inputs — read all of these before starting
 
 | File | What it contains |
 |---|---|
-| `EDITORIAL_DIR/outline.md` | The approved article outline — your brief. Every authority signal flagged here needs a source. |
-| `EDITORIAL_DIR/angle.md` | The editorial angle — research must support this position, not undermine it |
-| `DATA_DIR/keyword.json` | Target keyword and table-stakes topics |
-| `DATA_DIR/serp-pages/1.md` … `DATA_DIR/serp-pages/10.md` | Competitor pages — note what sources they cite, then find better ones |
+| `EDITORIAL_DIR/outline.md` | The approved article outline — your brief. Read the `source_strategy` frontmatter field first. |
+| `EDITORIAL_DIR/angle.md` | The editorial angle — research must support this position |
+| `DATA_DIR/keyword.json` | Target keyword, table-stakes topics, and `competitor_sources` — external URLs cited by top-3 ranking pages. Read this before searching for your own sources. |
 
-Read `EDITORIAL_DIR/outline.md` fully before starting. Your job is to fill every "Authority signal needed" gap in the outline.
+**Read `source_strategy` from `outline.md` frontmatter before gathering any sources.** It determines which source types are acceptable throughout this step.
 
 ---
 
 ## Step 1 — Build a research brief
 
-Before gathering anything, list what you need:
-
-- Every data point, statistic, or fact flagged in the outline
+List what you need before gathering anything:
+- Every data point, statistic, or fact flagged as "Authority signal needed" in the outline
 - Every section where a credible external source would strengthen the argument
 - Any claims in the angle that need evidential backing
 - PAA questions that require a factual, citable answer
@@ -46,36 +42,31 @@ Prioritise: which 3–5 pieces of research will most directly support the angle 
 
 ## Step 2 — Gather sources
 
-For each item in your research brief, find the best available source. Prefer:
+The acceptable source pool depends on `source_strategy`:
 
-1. **Primary sources** — government data, official reports, academic papers, regulatory bodies
-2. **Recognised industry authorities** — established trade bodies, major research firms, central banks
-3. **Original journalism with named sources** — not aggregator summaries
-4. **Direct expert quotes** — only if attributable to a named, credentialled individual
+**For `evidence` strategy — primary sources only:**
+1. Government data, official reports, regulatory bodies
+2. Academic papers, recognised research firms, central banks
+3. Original journalism with named sources (not aggregator summaries)
+4. Direct expert quotes — only if attributable to a named, credentialled individual
 
-Avoid:
-- Other SEO blog posts summarising the same information
+**For `lifestyle` strategy — expand the pool with editorial sources:**
+
+The same quality criteria apply (named author, publication date, stable URL, credible for this specific claim). In addition, these source types are acceptable:
+- Named-author pieces in recognisable editorial publications (NYT, The Guardian, Vogue, Bon Appétit, Wired, and equivalents)
+- Established specialist editorial brands with clear standards (Healthline, Serious Eats, Wine Folly, and equivalents)
+- Expert practitioner content with a named author, a stated credential, and a recognisable publication or personal brand
+
+**For `lifestyle+evidence` strategy:** apply evidence-tier sources for factual claims; the expanded lifestyle pool for advisory, cultural, or experiential claims.
+
+**Avoid in all strategies:**
+- SEO blog posts summarising the same information
 - Sources without a clear author or publication date
 - Statistics with no original source linked
-- Anything more than 3 years old unless it is definitional or historical
-
-**If `source_strategy` in `outline.md` frontmatter includes `lifestyle`**, expand the acceptable source pool with a lifestyle editorial tier:
-
-- Named-author pieces in recognisable editorial publications (NYT, The Guardian, Vogue, GQ, Bon Appétit, Wired, Monocle, and equivalents)
-- Established specialist editorial brands with clear editorial standards (Healthline, Well+Good, Wine Folly, Serious Eats, The Spruce Eats, and equivalents)
-- Expert practitioner content with a named author, a stated domain credential, and a recognisable publication or personal brand with an editorial track record
-
-Quality criteria apply regardless of source type:
-- Named author with a byline history or stated credential
-- Publication date visible
-- URL likely to remain stable (avoid aggregators, slideshows, AMP pages)
-- Link-worthy: a reader would consider this publication credible for this specific claim
-
-Still avoid even in lifestyle mode:
-- Unnamed or uncredentialled blog posts
-- Content farm articles (eHow, generic listicle sites without named authors)
-- Social media posts — acceptable to reference in prose, not to cite as a source
-- Press releases unless citing the release itself as the record of an announcement
+- Content farms (eHow, generic listicle sites without named authors)
+- Social media posts (acceptable to reference in prose, not to cite as a source)
+- Press releases unless citing the release itself as an announcement record
+- Anything over 3 years old unless definitional or historical
 
 For each source, read the relevant section carefully. Extract only what is directly useful.
 
@@ -83,11 +74,12 @@ For each source, read the relevant section carefully. Extract only what is direc
 
 ## Step 3 — Write the sources index
 
-Write `sources/index.json` to DATA_DIR (i.e. `DATA_DIR/sources/index.json`):
+Write `DATA_DIR/sources/index.json`:
 
 ```json
 {
   "keyword": "target keyword",
+  "source_strategy": "evidence | lifestyle | lifestyle+evidence",
   "sources": [
     {
       "id": "source-slug",
@@ -95,11 +87,10 @@ Write `sources/index.json` to DATA_DIR (i.e. `DATA_DIR/sources/index.json`):
       "url": "https://...",
       "publisher": "Publisher or organisation name",
       "date": "YYYY-MM or YYYY",
-      "type": "government | academic | industry | journalism | official",
+      "type": "government | academic | industry | journalism | editorial | official",
       "use_for": "Which section of the outline this supports",
       "key_facts": [
-        "Exact fact or statistic as it appears in the source",
-        "Another fact — exact wording, not paraphrased"
+        "Exact fact or statistic as it appears in the source — not paraphrased"
       ]
     }
   ]
@@ -110,7 +101,7 @@ Write `sources/index.json` to DATA_DIR (i.e. `DATA_DIR/sources/index.json`):
 
 ## Step 4 — Write individual source files
 
-For each source in the index, write a file `DATA_DIR/sources/[source-slug].md`:
+For each source in the index, write `DATA_DIR/sources/[source-slug].md`:
 
 ```markdown
 # [Source title]
@@ -129,25 +120,18 @@ For each source in the index, write a file `DATA_DIR/sources/[source-slug].md`:
 [Exact relevant text from the source — verbatim where possible, clearly marked as extract]
 *Page / section: [where in the document this appears]*
 
-### [Fact or finding 2]
-[Exact relevant text]
-*Page / section: ...*
-
 ---
 
 ## How to use this in the article
 
-[2–3 sentences: how the writer should use this source, what claim it supports, how to cite it naturally in prose]
+[2–3 sentences: what claim this source supports, how to cite it naturally in prose]
 ```
-
-Write one file per source. Name them to match the `id` field in `sources/index.json`.
 
 ---
 
 ## Step 5 — Flag any gaps
 
-If you cannot find a credible primary source for something flagged in the outline, say so explicitly. Do not substitute a weak source for a strong one. Instead, note:
-
+If you cannot find a credible source for something flagged in the outline, say so explicitly. Do not substitute a weak source for a strong one. Note:
 - What the gap is
 - What kind of source would fill it
 - Whether the section can still be written credibly without it
@@ -172,14 +156,13 @@ Add a `gaps` array to `DATA_DIR/sources/index.json`:
 When all source files are written, end your session with:
 
 > **Research complete.**
+> Source strategy: [evidence / lifestyle / lifestyle+evidence]
 > Sources gathered: [N]
-> Gaps flagged: [N] — [list them briefly if any]
+> Gaps flagged: [N — list briefly if any]
 >
 > Review `DATA_DIR/sources/index.json` before continuing. Check:
-> - Are the sources credible and primary? (government, academic, official — not SEO blogs)
 > - Is there a source for every "Authority signal needed" in the outline?
-> - Are the gaps flagged acceptable, or do you want to find alternatives first?
+> - Are sources appropriate for the declared `source_strategy`?
+> - Are the flagged gaps acceptable, or do you want alternatives first?
 >
-> If you want to add or replace a source, edit `sources/index.json` and add/update the corresponding source file manually before pressing Enter.
->
-> Press Enter in the terminal when you're satisfied with the research pack.
+> Press Enter when you're satisfied with the research pack.

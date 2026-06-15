@@ -10,33 +10,7 @@ description: "Step 7 — editorial cold read and quality pass on the draft. Fix-
 
 ## Order note
 
-Revision runs *before* the audit step. The audit fixes mechanical issues (banned phrases, rhythm, structural standards) in a draft that has already been editorially reviewed. Your job is editorial quality — not language cleanup. Do not conflate the two. If you find a banned phrase or rhythm issue while editing, note it in `work-log.md` for the audit to handle. Do not fix mechanical issues yourself in this step.
-
----
-
-## Before you begin revision: read these two files
-
-**1. Read `EDITORIAL_DIR/work-log.md` in full.**
-Scan every entry from `init` through `writing`. You are looking for:
-- Steps that ran partial or with errors — what data might be degraded or missing
-- Workarounds that were used — decisions that may need to be revisited
-- Human gate decisions — what the editor approved or changed and why
-
-**2. Read `EDITORIAL_DIR/writer-notes.md` in full.**
-These are observations from the writing and audit sessions. Some will be directly actionable (a flagged section to tighten, a claim to verify). Some will be context (why a structural decision was made). Some will be signals for the human editor rather than for you.
-
-Act on notes that fall within the revision skill's remit. Pass the rest to the human via revision-notes.md.
-
-**After revision, write one entry to `EDITORIAL_DIR/work-log.md`:**
-
-```
----
-step: revision | [timestamp] | status: complete
----
-[What changed and why. Sections tightened, claims adjusted, structural moves made. Any writer notes that were actioned. Any writer notes passed to human in revision-notes.md.]
-```
-
-Do not write to writer-notes.md during revision. That file's writing phase is closed.
+Revision runs *before* the audit step. The audit fixes mechanical issues (banned phrases, rhythm, structural standards). Your job is editorial quality — not language cleanup. If you spot a banned phrase or rhythm issue while editing, note it in `work-log.md` for the audit to handle. Do not fix mechanical issues in this step.
 
 ---
 
@@ -45,162 +19,175 @@ Do not write to writer-notes.md during revision. That file's writing phase is cl
 You are an active editor. The human has reviewed the draft and may have made their own edits directly to `draft.md`. Your job is to:
 
 1. Check that any human edits are consistent with the angle, brand voice, and article structure
-2. Do a full editorial pass — logic gaps, weak sections, thin device execution, buried insights, conclusions that don't land
-3. Fix what you can directly. Ensure the article is genuinely ready to publish, not just technically compliant
+2. Do a full editorial pass — redundancy, weak hooks, thin device execution, buried insights, conclusions that don't land
+3. Fix what you can directly. Ensure the article is genuinely ready to publish, not just technically compliant.
 
-**Fix, don't just flag.** Document every substantive change in `work-log.md` with one sentence explaining why. Only escalate to the human via `revision-notes.md` when:
-- Fixing requires information only the brand has: a real case, a specific stat, experience you cannot fabricate
-- You would be reversing a claim the human deliberately made
-
-Don't flag things you can fix. Flags are for genuine blockers, not abdication.
+**Fix, don't just flag.** Document every substantive change in `work-log.md`. Only escalate to the human via `revision-notes.md` when fixing requires information only the brand has, or would reverse a deliberate human decision.
 
 ---
 
 ## Inputs — read all of these
 
-Editorial files are in EDITORIAL_DIR. Data files are in DATA_DIR. Brand files are in BRAND_DIR.
-
 | File | What it contains |
 |---|---|
-| `EDITORIAL_DIR/draft.md` | The audited draft — may include human edits since the audit step |
-| `EDITORIAL_DIR/outline.md` | The approved outline — check the final draft still honours the structure and intent |
-| `EDITORIAL_DIR/angle.md` | The approved angle — the editorial test everything is measured against |
+| `EDITORIAL_DIR/draft.md` | The draft — may include human edits |
+| `EDITORIAL_DIR/work-log.md` | Prior step notes — scan for workarounds and human gate decisions |
+| `EDITORIAL_DIR/writer-notes.md` | Writer observations — act on what's in revision's remit |
+| `EDITORIAL_DIR/outline.md` | The approved outline — check the draft still honours structure and intent |
+| `EDITORIAL_DIR/angle.md` | The editorial test everything is measured against |
 | `BRAND_DIR/brand-voice-card.md` | Brand voice — final check that voice is consistent throughout |
-| `BRAND_DIR/voice-dna.md` | Observed voice patterns from real posts — check opening, rhythm, and teaching style match (read if it exists) |
-| `BRAND_DIR/audience-profiles.md` | Reader segments with trust signals and bounce triggers — use in Step 2 reader filter check (read if it exists) |
-| `DATA_DIR/sources/index.json` | Research index — verify all claims in the draft are supported |
+| `BRAND_DIR/voice-dna.md` | Observed voice patterns — check opening, rhythm, teaching style match (read if it exists) |
+| `BRAND_DIR/audience-profiles.md` | Reader segments — calibrate intro and tone checks (read if it exists) |
+| `DATA_DIR/sources/index.json` | Research index — verify all claims are supported |
 | `DATA_DIR/keyword.json` | Target keyword and PAA questions — final SEO check |
 
 ---
 
 ## Step 1 — Identify any human edits
 
-Read `draft.md` and note anything that looks like a recent human edit — sections that differ from the outline structure, new content added, passages rewritten in a different register.
+Read `draft.md` and note anything that looks like a recent human edit — sections differing from the outline, new content added, passages rewritten in a different register.
 
-For each human edit, check:
-- Is it consistent with the angle?
-- Does it stay on-voice with `brand-voice-card.md`?
-- Does it introduce any unsupported claims (i.e. no source in `sources/`)?
-- Does it break the flow or logic of the surrounding content?
-
-If an edit has a problem, flag it inline with: `<!-- REVISION FLAG: [what the issue is] -->`
-
-Do not silently fix human edits. Flag them and let the human decide.
+For each human edit, check: is it consistent with the angle, on-voice, and supported by sources? If an edit has a problem, flag it inline with `<!-- REVISION FLAG: [what the issue is] -->`. Do not silently fix human edits.
 
 ---
 
-## Step 2 — Editorial quality pass
+## Step 2 — Cold read first
 
-**Cold read first — do this before any checklist.**
-Read the article start to finish without looking at the outline or angle. Read it as a first-time reader who knows nothing about how it was built. Note your genuine reactions:
-- Did the opening make you want to keep reading, or did it feel like setup?
+Read the article start to finish as a first-time reader who knows nothing about how it was built. Note genuine reactions:
+- Did the opening make you want to keep reading?
 - Is the insight present and clear by the halfway point?
-- Did anything make you want to click away — a vague section, a slow passage, throat-clearing?
+- Did anything make you want to click away — a vague section, throat-clearing?
 - Does it end in the right place, or does it keep going after it's done?
 
-Write your cold read impressions at the top of `revision-notes.md` before running any other check. These are your most honest signal — a structural checklist cannot replace them.
+Write your cold read impressions at the top of `revision-notes.md` before running any other check. These are your most honest signal.
 
 ---
 
-**Does it pass the reader filter?**
-If `BRAND_DIR/audience-profiles.md` exists, find the profile matching this article's target reader. Then check:
-- Does the opening hit their trust signals — does the first paragraph signal the credibility they're looking for?
-- Does anything in the first 200 words trigger their bounce conditions? (Generic framing, AI-sounding opener, no signal that this is different)
-- Does the article address their specific content frustrations — the thing other content on this topic gets wrong?
+## Step 3 — Editorial quality pass
 
-**Does it deliver on the angle?**
-- Is the editorial position visible throughout, or does it fade after the introduction?
-- Does the article actually do what the angle promises — or does it drift into generic coverage?
+Run each check below. Fix directly where you can. Flag for human attention only when fixing requires brand-specific information.
 
-**Are the content devices working?**
-- Find each section marked as a content device in the outline
-- Is the device executed fully and well, or is it thin?
-- A fiction character walkthrough should feel vivid and specific. A counterintuitive take should feel genuinely surprising. A dialogue should feel real. If a device feels like it was phoned in, flag it.
+### Intro pressure test
 
-**Are there logic gaps?**
-- Does each section follow logically from the one before it?
-- Are there claims that feel unsupported even if no `[SOURCE NEEDED]` tag is present?
-- Is there anything a sceptical reader would push back on that the article doesn't address?
+The introduction is the highest-leverage part of the article. Fix it first.
 
-**Does the voice match the DNA?**
-If `BRAND_DIR/voice-dna.md` exists, check three things:
-- Does the opening pattern match what was observed in real posts — or does it feel like a different brand?
-- Does the teaching style match — if the brand uses direct assertion and worked examples, is that what's in the draft?
-- Are the signature vocabulary and patterns present, or has the draft drifted into generic register?
+**Redundancy.** Does the intro say the same thing more than once across paragraphs? If the same point — "this thing is different from the familiar thing," "most people don't know this exists," "you are about to learn something" — appears in two or more forms before the first H2, collapse it into the strongest version. Four paragraphs establishing the same premise is one paragraph that needs editing.
 
-**Is the conclusion earning its place?**
-- Does it consolidate the angle, or just summarise the sections?
-- Is the CTA specific and genuinely useful to the target reader?
+**Curiosity gap.** Does the intro close with something that compels the reader forward? "This article covers X, Y, and Z" is not a curiosity gap — it is a table of contents. The closing line of the intro should name something the reader does not yet know, set up a tension that requires reading to resolve, or make a claim specific enough to demand explanation. If the closing line could be cut without the reader noticing, rewrite it.
 
-**Does it produce an action?**
-After reading this article, what does the reader *do* differently — not what do they know, but what do they decide, what do they stop doing, what specific step do they take? If the answer is "nothing specific", the conclusion isn't earning its place. Sharpen it until the behavioral outcome is clear.
+**Opening hook.** Does the first sentence do work? It should place the reader in a situation or create an immediate problem. If it begins with a definition, a generic orientation statement, or a question, rewrite it.
 
-**PAA questions:**
-- Are all PAA questions from `keyword.json` answered clearly?
-- Is the answer to each one findable quickly — a direct sentence, not buried in a paragraph?
+**Cultural and geographic references.** Are all examples and comparisons immediately legible to the target audience? A reference that is obvious to one regional audience may be opaque or irrelevant to another. Flag any example a reader outside the reference's origin country or culture would not instantly understand. Replace it with a direct, audience-local equivalent, or cut it.
 
 ---
 
-## Step 3 — Fix, then write your revision notes
+### Structure audit
 
-Make direct edits to `EDITORIAL_DIR/draft.md` for anything you can fix: thin sections, weak conclusions, buried insights, device sections that feel phoned in, arguments that don't follow logically.
+**Section redundancy.** Does any section substantially repeat what the intro, or a prior section, has already established? If a section opens by restating a distinction or premise already made, cut the restatement and begin with what is new. This is most common in the second major section of articles with a strong establishing intro: the writer restated the setup because it felt needed — but the reader already has it.
 
-**If returning from audit flags**, work through each `<!-- AUDIT FLAG: ... -->` comment in the draft. For em dashes specifically — do not substitute a colon, comma, or parenthesis and call it done. Read the whole sentence and decide what it actually needs:
+**Formatting consistency.** If a structural element appears more than once — venue names, product entries, tip callouts, people profiles — it must be formatted consistently throughout. Bold in one place and H3 in another is a problem. Pick the treatment that best serves readability and apply it uniformly to every instance.
 
-- **Parenthetical aside** (`X — detail — continues`): Ask whether the aside earns its place. If yes, restructure as a relative clause (`X, which detail, continues`) or pull it out as its own sentence. If no, cut it.
-- **Dramatic pause or contrast** (`claim — punchline`): Split into two sentences. Let the second carry the weight on its own.
-- **Inline definition** (`term — what it means`): Rephrase as a subordinate clause: `term, which means...`
-- **Clarification after a quote** (`"quote" — explanation`): Start a new sentence. `"Quote." The explanation follows.`
+**Self-referential labels.** Does the article use abstract labels ("Type 1," "Type 2," "Option A") in running prose as substitutes for the thing's actual name? Labels can exist in a summary table where they aid comparison. They should not appear in prose where the real name is available. Replace every label with its real name wherever it appears outside a table.
 
-The rewritten sentence must read naturally with no punctuation patch. If it still feels awkward, rewrite further.
+**Detached tip blocks.** Are there standalone "Things worth knowing" or "Before you go" sections containing points that could be folded into adjacent content? Tips that map directly onto a preceding section (e.g., a "colour is the first signal" tip sitting after a "Sight" section) belong inside that section — not in a separate block that the reader must connect themselves. Fold them in, then remove the block.
 
-**Scope discipline on audit-return passes:** Only fix the flagged lines. If you find unflagged issues worth addressing while working through the flags, note them in revision-notes.md under "Additional flags found" — do not fix them silently. If you do fix them, mark the scope as "beyond surgical" in your revision notes — a re-audit will be required.
+---
 
-After editing, write `revision-notes.md` to EDITORIAL_DIR documenting what changed and what needs human input:
+### Section-level checks
+
+**Angle delivery.** Is the editorial position visible throughout, or does it fade after the introduction? Does the article actually do what the angle promises?
+
+**Content devices.** Find each device section from the outline. Is it executed fully and specifically — vivid, surprising, real? If it feels phoned in, fix it.
+
+**Quotes.** Every quote must earn its place. A quote earns its place by doing something the surrounding prose cannot: delivering a specific piece of information, adding a voice that changes the register, or providing attribution authority. If a quote restates what the paragraph already says, or says something vague enough that paraphrasing it would lose nothing, remove it. Do not keep a quote simply because it came from a credible source.
+
+**Logic gaps.** Does each section follow logically from the one before? Are there claims a sceptical reader would push back on that the article doesn't address?
+
+**Data and pricing consistency.** If a specific number — price, date, statistic — appears in a footnote, caveat, or asterisk note, it must also appear in the main body where it is first relevant. A reader who reaches a footnote referencing a price they have not yet seen will be confused. Move the number into the body, then remove the footnote. If the number cannot be placed in the body, remove both.
+
+**Voice DNA match** (if `voice-dna.md` exists). Does the opening pattern, teaching style, and signature vocabulary match what was observed in real posts?
+
+---
+
+### Conclusion and CTA
+
+**Angle consolidation.** Does the conclusion consolidate the article's editorial position, or does it just summarise sections?
+
+**Commercial tone.** Does the CTA actively sell the brand's product or service? Read it as a first-time visitor who knows nothing about the brand. Does it make a reader want to act, or does it unintentionally introduce doubt? A CTA that ranks products against each other ("X matters more than Y"), leads with caveats, or closes on a limiting instruction ("just start with X") is not a sales close — it is an editorial instruction. Rewrite it to make the full product or service range appealing.
+
+**Specificity.** Is the CTA specific and genuinely useful? A vague CTA ("visit our website to learn more") does not justify the reader's time. The CTA should name a specific product, offer, or next step.
+
+**Product card placeholders.** If the article is for a site that uses product cards, add `[Product card: description]` placeholders at the appropriate points in the Bring It Home or equivalent section. These are publishing instructions, not content. They will be replaced with actual cards before the post goes live.
+
+---
+
+### PAA coverage
+
+Are all PAA questions from `keyword.json` answered clearly and findably? A PAA answer should be a direct sentence that could stand alone as a featured snippet response, followed by elaboration if needed.
+
+---
+
+## Step 4 — Fix, then write revision notes
+
+Make direct edits to `draft.md` for anything you can fix.
+
+**If returning from audit flags:** work through each `<!-- AUDIT FLAG: ... -->` comment. For em dash flags specifically, apply the rewriting patterns in `BRAND_DIR/de-ai-guidelines.md` — do not substitute a punctuation patch.
+
+**Scope discipline on audit-return passes:** fix only the flagged lines. If you notice other issues while working, note them in `revision-notes.md` — do not fix them silently.
+
+After editing, write `revision-notes.md` to EDITORIAL_DIR:
 
 ```markdown
 # Revision Notes — [keyword]
 *[today's date]*
 
+## Cold read impressions
+[Honest first-read reactions — before any checklist]
+
 ## Human edits found
-- [Edit description] — [status: consistent / flagged — see inline comment]
+- [Edit description] — [consistent / flagged — see inline comment]
 
 ## Editorial flags
-- [Section name]: [what the issue is and what to consider doing about it]
+[None — or list by section: issue and what was done]
 
 ## Content device assessment
-- [Device name] in [section]: [working well / needs strengthening — specific suggestion]
+[One line per device: executed well / fixed / flagged]
 
-## Logic gaps
-- [Description of gap and suggested fix]
+## Changes made
+1. [What changed and why]
 
-## Additional flags found
-- [Any unflagged issues noticed during an audit-return pass — do not fix silently]
-
-## Scope
-Surgical (flagged lines only) / Beyond surgical (unflagged content changed — re-audit required)
+## For human attention
+[Items that need brand-specific input before publishing — or "None"]
 
 ## Ready to publish?
-Yes / Not yet — [if not, list what needs addressing before pressing Enter]
+Yes / Not yet — [if not, what specifically needs addressing]
+```
+
+Update `work-log.md`:
+
+```
+---
+step: revision | [timestamp] | status: complete
+---
+[What changed and why. Writer notes actioned. Anything passed to human in revision-notes.md.]
 ```
 
 ---
 
-## Step 4 — If changes are needed
+## Step 5 — Strip sources before finalising
 
-If your revision notes identify issues the human needs to address, end your session with the notes visible and wait. Do not proceed.
+The sources section in `draft.md` is a working reference for the revision and audit steps. It must not appear in the published article.
 
-If the draft is clean and ready, make any minor mechanical fixes directly in `EDITORIAL_DIR/draft.md`, update the frontmatter status to `final`, and end your session.
+Before marking the draft final, remove the `*Sources used:*` block and everything below it. Sources remain accessible in `DATA_DIR/sources/` and in `writer-notes.md` for any future verification.
 
-Update frontmatter:
+If the draft is clean, update the frontmatter:
 
 ```markdown
 ---
 title: [headline]
 keyword: [keyword]
 date: [original date]
-revised: [audit date]
-finalised: [today's date YYYY-MM-DD]
+revised: [today's date YYYY-MM-DD]
 status: final
 ---
 ```
@@ -209,16 +196,10 @@ status: final
 
 ## Human gate
 
-End your session with:
-
 > **Revision complete.**
 >
 > Human edits found: [N]
 > Editorial flags: [N — or "none"]
-> Device sections: [working well / flagged — see revision-notes.md]
-> Scope: [Surgical / Beyond surgical]
-> Re-audit needed: [Yes / No]
-> Status: [Ready to publish / Needs attention]
+> Status: [Ready to publish / Needs attention — see revision-notes.md]
 >
-> Review `EDITORIAL_DIR/revision-notes.md` for any flags that need your decision.
-> When you're satisfied, press Enter to build the final output.
+> Press Enter to build the final output.

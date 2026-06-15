@@ -34,14 +34,13 @@ STEPS = [
     "angle",             # Claude Code session → angle.md
     "headline-outline",  # fetch_sitemap + Claude Code session → headline.md, outline.md
     "research",          # fetch_url (sources) → sources/
-    "writing",           # Claude Code session → draft.md
-    "revision",          # Claude Code session → editorial pass, active fixes → draft.md improved
-    "audit",             # scan_banned_phrases + analyse_rhythm + Claude Code → mechanical cleanup only
+    "writing",           # Claude Code session → draft.md (+ banned phrase gate)
+    "polish",            # scan scripts + Claude Code → editorial + mechanical cleanup → draft.md polished
     "links",             # build_page_index (incremental) + match_internal_links → candidates.json
-    "output",            # validate_meta + generate_schema + build_output → final.html
+    "output",            # validate_meta + generate_schema + build_output + generate_checklist → final.html + publish-checklist.md
 ]
 
-HUMAN_GATES = {"angle", "headline-outline", "research", "revision"}
+HUMAN_GATES = {"angle", "headline-outline", "research", "polish"}
 
 # ---------------------------------------------------------------------------
 # Shared utilities

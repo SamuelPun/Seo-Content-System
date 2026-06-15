@@ -45,9 +45,15 @@ NS = {"sm": "http://www.sitemaps.org/schemas/sitemap/0.9"}
 # Fetch helpers
 # ---------------------------------------------------------------------------
 
+_HEADERS = {
+    "User-Agent": "Mozilla/5.0 (compatible; SEOContentSystem/1.0)",
+    "Accept": "application/xml,text/xml,*/*",
+}
+
+
 def fetch_xml(url: str) -> ET.Element:
     """Fetch a URL and parse as XML. Follows redirects automatically."""
-    response = requests.get(url, timeout=30, allow_redirects=True)
+    response = requests.get(url, timeout=30, allow_redirects=True, headers=_HEADERS)
     if response.status_code != 200:
         print(f"ERROR: Got {response.status_code} fetching {url}", file=sys.stderr)
         sys.exit(1)
