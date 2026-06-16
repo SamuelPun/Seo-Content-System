@@ -74,7 +74,7 @@ Contrast paragraph. Hong Kong uses territorial taxation: only income sourced in 
 This section is the payoff — the contrast that makes the Dutch exit worth doing carefully. Keep it punchy, not promotional.
 
 ### Section 7: How Monx Can Help (~100 words)
-Monx sets up HK employment structures and company arrangements so income is properly HK-sourced from the start — which matters both for HK salaries tax purposes and for reinforcing the Dutch residency exit argument. Direct CTA: hello@monx.team.
+Position: the 183-day rule is one thread in a larger picture. Employment contracts, company arrangements, and income sourcing each affect the Dutch exit argument, HK salaries tax treatment, and what is reported during the transition year. Monx gets the whole structure right from the start — maximum tax efficiency, no back-tax exposure from a missed step. Direct CTA: hello@monx.team.
 
 ---
 
