@@ -62,11 +62,10 @@ def main():
     if not brand_dir.exists():
         print(f"WARNING: Brand folder not found at {brand_dir} — skills will not find brand files")
 
-    profile = load_client_profile(client_dir)
     ctx = RunContext(
         content_dir=content_dir,
         brand_dir=brand_dir,
-        sitemap_url=profile.get("sitemap_url"),
+        sitemap_url=load_client_profile(client_dir),
     )
 
     display_name = args.article

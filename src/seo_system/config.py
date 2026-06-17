@@ -62,14 +62,10 @@ def get_content_base() -> Path:
     return Path(val)
 
 
-def load_client_profile(client_dir: Path) -> dict:
-    """Parse profile.md and return a dict with known fields."""
+def load_client_profile(client_dir: Path) -> str | None:
+    """Return the sitemap URL from profile.md, or None."""
     profile_path = client_dir / "profile.md"
     if not profile_path.exists():
-        return {}
-    text = profile_path.read_text(encoding="utf-8")
-    data = {}
-    m = re.search(r'\*\*Sitemap index:\*\*\s*(\S+)', text)
-    if m:
-        data["sitemap_url"] = m.group(1).strip()
-    return data
+        return None
+    m = re.search(r'\*\*Sitemap index:\*\*\s*(\S+)', profile_path.read_text(encoding="utf-8"))
+    return m.group(1).strip() if m else None
