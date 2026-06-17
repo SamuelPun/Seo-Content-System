@@ -108,17 +108,17 @@ def main():
             continue
 
         print_status(f"Starting step: {step.upper()}")
-        log_step_start(article, ws, step)
+        log_step_start(ws, step)
 
         success = STEP_RUNNERS[step](ctx, article)
 
         if not success:
-            log_step_end(article, ws, step, "failed")
+            log_step_end(ws, step, "failed")
             print_status(f"Step '{step}' failed. Fix the issue and re-run with --step {step} --force", "error")
             sys.exit(1)
 
         mark_complete(content_dir, article, step)
-        log_step_end(article, ws, step, "complete")
+        log_step_end(ws, step, "complete")
         update_content_index(content_dir)
         print_status(f"{step} — done", "ok")
 

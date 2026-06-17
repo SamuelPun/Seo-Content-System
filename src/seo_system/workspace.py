@@ -108,7 +108,7 @@ def init_article_files(slug: str, workspace_path: Path, display_name: str = None
         )
 
 
-def log_step_start(slug: str, workspace_path: Path, step_name: str):
+def log_step_start(workspace_path: Path, step_name: str):
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
     entry = (
         f"---\nstep: {step_name} | {timestamp} | status: running\n---\n"
@@ -118,7 +118,7 @@ def log_step_start(slug: str, workspace_path: Path, step_name: str):
         f.write(entry)
 
 
-def log_step_end(slug: str, workspace_path: Path, step_name: str, status: str, note: str = ""):
+def log_step_end(workspace_path: Path, step_name: str, status: str, note: str = ""):
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
     note_line = f"\n{note}" if note else ""
     entry = (
