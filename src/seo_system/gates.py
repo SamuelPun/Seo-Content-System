@@ -17,8 +17,8 @@ def _parse_angle(angle_path: Path):
     if not angle_path.exists():
         return None, None
     text = angle_path.read_text(encoding="utf-8")
-    reader_m = re.search(r'## Target reader\s*\n([^\n#]+)', text)
-    angle_m  = re.search(r'## Our angle\s*\n([^\n#]+)', text)
+    reader_m = re.search(r'^target_reader:\s*(.+)', text, re.MULTILINE)
+    angle_m  = re.search(r'^angle:\s*(.+)', text, re.MULTILINE)
     reader = reader_m.group(1).strip() if reader_m else None
     angle  = angle_m.group(1).strip()  if angle_m  else None
     return reader, angle
@@ -93,7 +93,7 @@ def interactive_gate(step: str, ws: Path):
                 angle_path = ws / "editorial" / "angle.md"
                 if angle_path.exists():
                     text = angle_path.read_text(encoding="utf-8")
-                    text = re.sub(r'(## Our angle\s*\n)[^\n#]*', rf'\g<1>{raw}\n', text)
+                    text = re.sub(r'^(angle:\s*).*', rf'\g<1>{raw}', text, flags=re.MULTILINE)
                     angle_path.write_text(text, encoding="utf-8")
                 print_status(f"Angle updated to: {raw}", "ok")
 
@@ -135,18 +135,6 @@ def interactive_gate(step: str, ws: Path):
                     print(f"    [{impact}] {missing}")
             print()
             print("  Press Enter to accept, or review sources/index.json manually first:")
-            input("  → ")
-
-        elif step == "revision":
-            flags, ready = _parse_revision_flags(ws)
-            print("  ⏸  REVISION REVIEW")
-            print(f"  Status : {ready}")
-            if flags:
-                print(f"  Flags  ({len(flags)}):")
-                for f in flags[:10]:
-                    print(f"    · {f}")
-            print()
-            print("  Press Enter to continue to output:")
             input("  → ")
 
         else:

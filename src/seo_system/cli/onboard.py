@@ -16,11 +16,16 @@ import shutil
 import sys
 
 from seo_system.config import BRAND_TMPL, get_content_base, normalise_slug
-from seo_system.onboard.claude import generate_claude_files, generate_content_prefs, generate_voice_dna, generate_website_summary
-from seo_system.onboard.website_research import fetch_website_pages
+from seo_system.onboard.claude import (
+    generate_claude_files,
+    generate_content_prefs,
+    generate_voice_dna,
+    generate_website_summary,
+)
 from seo_system.onboard.prompts import ask, confirm, header
 from seo_system.onboard.qa import build_qa_text, run_qa
 from seo_system.onboard.scraper import fetch_posts_for_voice_analysis
+from seo_system.onboard.website_research import fetch_website_pages
 from seo_system.onboard.writers import (
     write_competitors,
     write_content_index,
