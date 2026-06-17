@@ -17,43 +17,58 @@ def _fetch_xml(url: str) -> ET.Element:
     return ET.fromstring(r.content)
 
 
+def _entries_from_urlset(root: ET.Element) -> list[dict]:
+    """Return [{url, lastmod}] for every <url> entry in a urlset."""
+    entries = []
+    for url_el in root.findall("sm:url", NS):
+        loc = url_el.findtext("sm:loc", namespaces=NS)
+        if not loc:
+            continue
+        lastmod = url_el.findtext("sm:lastmod", namespaces=NS)
+        entries.append({"url": loc.strip(), "lastmod": lastmod.strip() if lastmod else None})
+    return entries
+
+
 def _urls_from_urlset(root: ET.Element) -> list[str]:
-    return [
-        el.text for el in root.findall(".//sm:loc", NS)
-        if el.text
-    ]
+    return [e["url"] for e in _entries_from_urlset(root)]
+
+
+def _newest_first(entries: list[dict]) -> list[dict]:
+    """Sort by lastmod descending; entries without a lastmod sort last."""
+    return sorted(entries, key=lambda e: e["lastmod"] or "", reverse=True)
 
 
 def _post_urls_from_sitemap(sitemap_url: str, want: int) -> list[str]:
-    """Return up to `want` URLs from a sitemap index or urlset."""
+    """Return up to `want` URLs from a sitemap index or urlset, newest first."""
     root = _fetch_xml(sitemap_url)
     tag = root.tag.split("}")[-1] if "}" in root.tag else root.tag
 
     if tag != "sitemapindex":
-        return _urls_from_urlset(root)[:want]
+        return [e["url"] for e in _newest_first(_entries_from_urlset(root))[:want]]
 
-    # Sitemap index: prefer child sitemaps whose URL contains "post" or "blog"
-    child_locs = [
-        el.text
+    # Sitemap index: prefer child sitemaps whose URL contains "post" or "blog",
+    # most recently updated first.
+    children = [
+        {"url": el.text, "lastmod": sm.findtext("sm:lastmod", namespaces=NS)}
         for sm in root.findall("sm:sitemap", NS)
         for el in [sm.find("sm:loc", NS)]
         if el is not None and el.text
     ]
+    priority = [c for c in children if any(k in c["url"] for k in ("post", "blog", "article"))]
+    rest = [c for c in children if c not in priority]
+    ordered = _newest_first(priority) + _newest_first(rest)
 
-    priority = [u for u in child_locs if any(k in u for k in ("post", "blog", "article"))]
-    ordered = priority + [u for u in child_locs if u not in priority]
-
-    urls: list[str] = []
-    for child_url in ordered:
-        if len(urls) >= want:
+    entries: list[dict] = []
+    for child in ordered:
+        if len(entries) >= want:
             break
         try:
-            child_root = _fetch_xml(child_url)
-            urls.extend(_urls_from_urlset(child_root))
+            child_root = _fetch_xml(child["url"])
+            entries.extend(_entries_from_urlset(child_root))
         except Exception:
             continue
 
-    return urls[:want]
+    return [e["url"] for e in _newest_first(entries)[:want]]
 
 
 def list_all_sitemap_urls(sitemap_url: str) -> list[str]:
