@@ -10,9 +10,6 @@ except ImportError:
     sys.exit(1)
 
 
-SITE_URL = "https://monx.team"
-
-
 def load_json(path):
     if path and path.exists():
         return json.loads(path.read_text(encoding="utf-8"))
@@ -75,7 +72,7 @@ def run(workspace: Path) -> bool:
 
     title       = (meta or {}).get("title")       or "Untitled"
     description = (meta or {}).get("description") or ""
-    url         = (meta or {}).get("url")         or f"{SITE_URL}/"
+    url         = (meta or {}).get("url")         or ""
 
     body_html = md_to_html(draft_text)
 

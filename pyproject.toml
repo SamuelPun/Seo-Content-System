@@ -17,6 +17,7 @@ dependencies = [
     "trafilatura>=1.9",
     "yake>=0.4",
     "ddgs>=1",
+    "markdown>=3.5",
 ]
 
 [project.optional-dependencies]

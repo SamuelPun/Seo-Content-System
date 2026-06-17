@@ -21,7 +21,6 @@ from datetime import date
 from html.parser import HTMLParser
 from pathlib import Path
 
-
 # ---------------------------------------------------------------------------
 # HTML parser
 # ---------------------------------------------------------------------------
@@ -208,7 +207,7 @@ def _generate(workspace: Path) -> None:
 
         title_tag = parser.title_text.strip()
         titles_match = (not meta_title) or (title_tag == meta_title)
-        ok, line = _check(bool(title_tag) and titles_match, f"<title> matches meta.json")
+        ok, line = _check(bool(title_tag) and titles_match, "<title> matches meta.json")
         checks.append(line)
         if not ok:
             issues.append(f"<title> ({title_tag!r}) does not match meta.json ({meta_title!r})")
