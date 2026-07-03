@@ -195,4 +195,4 @@ step: polish | [timestamp] | status: [complete | partial | error]
 > Em dashes rewritten: [N]
 > Status: [Ready to publish / Needs attention — see revision-notes.md]
 >
-> Press Enter to build internal links and final output.
+> Press Enter to build final output.

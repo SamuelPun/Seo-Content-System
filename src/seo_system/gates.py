@@ -144,5 +144,7 @@ def interactive_gate(step: str, ws: Path):
     except KeyboardInterrupt:
         print(f"\n\n  Stopped. Resume with: --from {step}")
         sys.exit(0)
+    except EOFError:
+        print("  (non-interactive — gate auto-passed)")
 
     print()

@@ -15,6 +15,14 @@ def extract_title(text):
     return match.group(1).strip() if match else None
 
 
+def extract_frontmatter_description(text):
+    m = re.match(r'\A---\n(.*?)\n---\n', text, re.DOTALL)
+    if not m:
+        return None
+    dm = re.search(r'^description:\s*(.+)$', m.group(1), re.MULTILINE)
+    return dm.group(1).strip() if dm else None
+
+
 def extract_first_paragraph(text):
     # Strip YAML frontmatter before processing
     text = re.sub(r'\A---\n.*?\n---\n?', '', text, flags=re.DOTALL)
@@ -36,8 +44,7 @@ def run(draft_path, out_dir, title=None, description=None, url=None):
     if not title:
         title = extract_title(text) or ""
     if not description:
-        first_para = extract_first_paragraph(text) or ""
-        description = first_para
+        description = extract_frontmatter_description(text) or extract_first_paragraph(text) or ""
 
     title_len = len(title)
     desc_len  = len(description)
@@ -52,17 +59,24 @@ def run(draft_path, out_dir, title=None, description=None, url=None):
     if desc_len > DESC_MAX:
         flags.append(f"Description too long ({desc_len} chars, max {DESC_MAX})")
 
+    out_path = out_dir / "meta.json"
+    # Preserve any extra fields (e.g. author) already in meta.json
+    existing = {}
+    if out_path.exists():
+        try:
+            existing = json.loads(out_path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            pass
     meta = {
+        **existing,
         "title":            title,
         "title_length":     title_len,
         "description":      description,
         "description_length": desc_len,
-        "url":              url or "",
+        "url":              url or existing.get("url", ""),
         "flags":            flags,
         "passed":           len(flags) == 0,
     }
-
-    out_path = out_dir / "meta.json"
     out_path.write_text(json.dumps(meta, indent=2, ensure_ascii=False), encoding="utf-8")
     print(f"[OK]   {out_path}")
     print("\n=== META VALIDATION ===")

@@ -164,6 +164,8 @@ def _generate(workspace: Path) -> None:
     else:
         try:
             schema      = json.loads(schema_path.read_text(encoding="utf-8"))
+            if isinstance(schema, list):
+                schema = schema[0] if schema else {}
             schema_type = schema.get("@type", "unknown")
             required    = ["headline", "datePublished", "author", "publisher", "description"]
             missing     = [f for f in required if not schema.get(f)]
@@ -178,15 +180,6 @@ def _generate(workspace: Path) -> None:
         except json.JSONDecodeError as exc:
             checks.append(f"- [✗] schema.json — invalid JSON: {exc}")
             issues.append("schema.json is not valid JSON")
-
-    # ---- internal-link-candidates.json ----
-    link_candidates: list[dict] = []
-    links_path = data_dir / "internal-link-candidates.json"
-    if not links_path.exists():
-        checks.append("- [?] internal-link-candidates.json — missing (links step may not have run yet)")
-    else:
-        link_candidates = json.loads(links_path.read_text(encoding="utf-8"))
-        checks.append(f"- [✓] Internal link candidates: {len(link_candidates)} suggested (add 4–5 manually)")
 
     # ---- final.html ----
     html_path = publish_dir / "final.html"
@@ -255,18 +248,10 @@ def _generate(workspace: Path) -> None:
         f"3. Set SEO title in Yoast: {meta_title}",
         f"4. Set meta description in Yoast: {meta_desc}",
         "5. Add the schema JSON-LD block to the post header (via Yoast or custom field)",
-        "6. Add internal links manually — see table below",
-        "7. Set publish date, category, and featured image",
-        "8. Preview — check H1, formatting, all links work",
-        "9. Publish",
+        "6. Set publish date, category, and featured image",
+        "7. Preview — check H1, formatting, all links work",
+        "8. Publish",
     ]
-
-    if link_candidates:
-        out += ["", "## Internal links to add manually", "", "| Page title | URL |", "|---|---|"]
-        for c in link_candidates[:8]:
-            url   = c.get("url", "")
-            title = c.get("title", url)
-            out.append(f"| {title} | {url} |")
 
     out_path = publish_dir / "publish-checklist.md"
     out_path.write_text("\n".join(out) + "\n", encoding="utf-8")

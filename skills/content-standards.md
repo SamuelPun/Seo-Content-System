@@ -77,7 +77,6 @@ The introduction is the highest-value real estate in the article. It must earn t
 - 3–5 per article — enough to support site structure, not so many it looks manipulative
 - Anchor text must be descriptive and natural — never "click here" or "read more"
 - Only link to pages that are genuinely relevant to the surrounding sentence — do not force links
-- Placement is handled by `match_internal_links.py` and reviewed in the output skill
 
 **External links:**
 - Link to primary sources cited in the article — government sites, official bodies, academic papers

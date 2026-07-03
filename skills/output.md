@@ -1,6 +1,6 @@
 ---
 name: output
-description: "Steps 9-10 — generates meta.json, schema.json, internal-link-candidates.json, final.html, and publish checklist."
+description: "Steps 9-10 — generates meta.json, schema.json, final.html, and publish checklist."
 ---
 
 # Skill: Output
@@ -10,7 +10,7 @@ description: "Steps 9-10 — generates meta.json, schema.json, internal-link-can
 
 ## Your job
 
-You are a technical content publisher. Review the final output package — meta tags, schema markup, internal link recommendations, and the assembled HTML — and confirm everything is correct and publish-ready.
+You are a technical content publisher. Review the final output package — meta tags, schema markup, and the assembled HTML — and confirm everything is correct and publish-ready.
 
 You do not rewrite the article. You verify, fix issues, and produce a publish checklist.
 
@@ -23,7 +23,6 @@ You do not rewrite the article. You verify, fix issues, and produce a publish ch
 | `PUBLISH_DIR/final.html` | The assembled publish-ready HTML file |
 | `DATA_DIR/meta.json` | SEO title and meta description — validated by `validate_meta.py` |
 | `DATA_DIR/schema.json` | Structured data markup (Article / FAQ / HowTo) |
-| `DATA_DIR/internal-link-candidates.json` | Recommended internal links with anchor text and target URLs |
 | `EDITORIAL_DIR/draft.md` | The final approved draft — use as reference for accuracy checks |
 | `EDITORIAL_DIR/outline.md` | Original outline — confirm final HTML reflects approved structure |
 | `DATA_DIR/keyword.json` | Target keyword — confirm it appears correctly in meta and content |
@@ -77,19 +76,7 @@ Flag any issues with: `[SCHEMA ISSUE: description]`
 
 ---
 
-## Step 3 — Verify internal links
-
-Read `DATA_DIR/internal-link-candidates.json`. For each recommended link:
-
-- [ ] The anchor text reads naturally in context
-- [ ] The target URL is relevant to the anchor text and surrounding content
-- [ ] No more than 4–5 internal links total (avoid over-linking)
-
-Flag any links that feel forced or irrelevant — recommend removing them.
-
----
-
-## Step 4 — Verify the HTML
+## Step 3 — Verify the HTML
 
 Read `PUBLISH_DIR/final.html`. Check:
 
@@ -112,7 +99,7 @@ Read `PUBLISH_DIR/final.html`. Check:
 
 ---
 
-## Step 5 — Write the publish checklist
+## Step 4 — Write the publish checklist
 
 Write `publish-checklist.md` to PUBLISH_DIR:
 
@@ -124,7 +111,6 @@ Write `publish-checklist.md` to PUBLISH_DIR:
 - [x] Meta title: [title] ([N chars])
 - [x] Meta description: [description] ([N chars])
 - [x] Schema: Article [+ FAQ if present] [+ HowTo if present]
-- [x] Internal links: [N] links recommended
 - [x] final.html: clean and complete
 
 ## Issues to resolve before publishing
@@ -136,15 +122,9 @@ Write `publish-checklist.md` to PUBLISH_DIR:
 3. Set SEO title in Yoast: [exact title]
 4. Set meta description in Yoast: [exact description]
 5. Add the schema JSON-LD block to the post header (via Yoast or custom field)
-6. Add internal links manually: [list anchor text → URL pairs]
-7. Set publish date, category, and featured image
-8. Preview — check H1, formatting, all links
-9. Publish
-
-## Internal links to add manually
-| Anchor text | Target URL |
-|---|---|
-[from internal-link-candidates.json]
+6. Set publish date, category, and featured image
+7. Preview — check H1, formatting, all links
+8. Publish
 ```
 
 ---

@@ -174,7 +174,7 @@ status: draft
 ---
 
 *Sources used:*
-- [Source title] — [URL]
+- [Source title]: [URL]
 ```
 
 ---

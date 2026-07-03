@@ -5,8 +5,6 @@ import sys
 from datetime import date
 from pathlib import Path
 
-SITE_URL = "https://monx.team"
-
 
 def extract_title(text):
     match = re.search(r'^#\s+(.+)$', text, re.MULTILINE)
@@ -33,8 +31,8 @@ def detect_type(text):
     return "Article"
 
 
-def build_article_schema(title, url, date_str):
-    return {
+def build_article_schema(title, url, date_str, author=None, description=None, publisher_name=None, publisher_url=None):
+    schema = {
         "@context": "https://schema.org",
         "@type": "Article",
         "headline": title,
@@ -43,10 +41,15 @@ def build_article_schema(title, url, date_str):
         "dateModified": date_str,
         "publisher": {
             "@type": "Organization",
-            "name": "Monx",
-            "url": SITE_URL,
+            "name": publisher_name or "",
+            "url": publisher_url or "",
         }
     }
+    if description:
+        schema["description"] = description
+    if author:
+        schema["author"] = {"@type": "Person", "name": author}
+    return schema
 
 
 def build_faq_schema(questions_text):
@@ -108,13 +111,21 @@ def run(draft_path, meta_path, out_dir, url=None):
     title = extract_title(text) or "Untitled"
     date_str = date.today().isoformat()
 
-    # Get URL from meta.json if it exists, otherwise use placeholder
+    # Get URL, author, description, publisher from meta.json if available
     page_url = url
-    if not page_url and meta_path and meta_path.exists():
+    meta_author = None
+    meta_description = None
+    meta_publisher_name = None
+    meta_publisher_url = None
+    if meta_path and meta_path.exists():
         meta = json.loads(meta_path.read_text(encoding="utf-8"))
-        page_url = meta.get("url")
+        page_url = page_url or meta.get("url")
+        meta_author = meta.get("author")
+        meta_description = meta.get("description")
+        meta_publisher_name = meta.get("publisher_name")
+        meta_publisher_url = meta.get("site_url")
     if not page_url:
-        page_url = f"{SITE_URL}/blog/placeholder-url/"
+        page_url = f"{meta_publisher_url or ''}/blog/placeholder-url/"
 
     schema_type = detect_type(text)
     print(f"[INFO] Detected schema type: {schema_type}")
@@ -122,7 +133,7 @@ def run(draft_path, meta_path, out_dir, url=None):
     schemas = []
 
     # Always include Article schema
-    schemas.append(build_article_schema(title, page_url, date_str))
+    schemas.append(build_article_schema(title, page_url, date_str, meta_author, meta_description, meta_publisher_name, meta_publisher_url))
 
     # Add FAQ or HowTo if detected
     if schema_type == "FAQPage":

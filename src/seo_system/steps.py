@@ -5,6 +5,7 @@ Workflow step runners. Each step_* function receives a RunContext and article sl
 from __future__ import annotations
 
 import json
+import re
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -152,10 +153,11 @@ def _validate_banned_phrases(ws: Path, data_dir: Path) -> bool:
 
     try:
         flags_data = json.loads(flags_path.read_text(encoding="utf-8"))
-        high = [f for f in flags_data.get("flags", []) if f.get("severity") == "HIGH"]
+        flags = flags_data if isinstance(flags_data, list) else flags_data.get("flags", [])
+        high = [f for f in flags if f.get("severity") == "HIGH"]
         if high:
             lines = "\n".join(
-                f"  Line {f.get('line', '?')}: {f.get('phrase', '?')!r}"
+                f"  Line {f.get('line_number', f.get('line', '?'))}: {f.get('phrase', '?')!r}"
                 for f in high
             )
             print_status(
@@ -167,6 +169,27 @@ def _validate_banned_phrases(ws: Path, data_dir: Path) -> bool:
         pass
 
     return True
+
+
+def _seed_publisher_meta(ctx: RunContext, data_dir: Path) -> None:
+    profile = ctx.brand_dir.parent / "profile.md"
+    if not profile.exists():
+        return
+    text = profile.read_text(encoding="utf-8")
+    name_m = re.search(r'\*\*Client name:\*\*\s*(.+)', text)
+    url_m  = re.search(r'\*\*Website:\*\*\s*(\S+)', text)
+    if not (name_m and url_m):
+        return
+    meta_path = data_dir / "meta.json"
+    existing = {}
+    if meta_path.exists():
+        try:
+            existing = json.loads(meta_path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            pass
+    existing["publisher_name"] = name_m.group(1).strip()
+    existing["site_url"] = url_m.group(1).strip()
+    meta_path.write_text(json.dumps(existing, indent=2, ensure_ascii=False), encoding="utf-8")
 
 
 def step_writing(ctx: RunContext, article: str) -> bool:
@@ -206,33 +229,6 @@ def step_polish(ctx: RunContext, article: str) -> bool:
     return _validate_banned_phrases(ws, data_dir)
 
 
-def step_links(ctx: RunContext, article: str) -> bool:
-    ws = workspace(ctx.content_dir, article)
-    draft = ws / "editorial" / "draft.md"
-    data_dir = ws / "data"
-    page_index = ctx.brand_dir / "page-index.json"
-
-    if not draft.exists():
-        print_status("editorial/draft.md not found — run 'writing' step first", "error")
-        return False
-
-    if not page_index.exists():
-        print_status("brand/page-index.json not found — run build_page_index.py for this client first", "error")
-        return False
-
-    index_args = ["--page-index", str(page_index)]
-    if ctx.sitemap_url:
-        index_args += ["--sitemap-url", ctx.sitemap_url]
-    ok = run_script("build_page_index.py", index_args)
-    if not ok:
-        print_status("build_page_index failed — using existing index (may be stale)", "skip")
-
-    return run_script("match_internal_links.py", [
-        "--draft",      str(draft),
-        "--page-index", str(page_index),
-        "--out-dir",    str(data_dir),
-    ])
-
 
 def step_output(ctx: RunContext, article: str) -> bool:
     ws = workspace(ctx.content_dir, article)
@@ -246,6 +242,7 @@ def step_output(ctx: RunContext, article: str) -> bool:
         print_status("editorial/draft.md not found", "error")
         return False
 
+    _seed_publisher_meta(ctx, data_dir)
     ok = run_script("validate_meta.py", ["--draft", str(draft), "--out-dir", str(data_dir)])
     if not ok:
         return False
@@ -272,6 +269,5 @@ STEP_RUNNERS: dict[str, callable] = {
     "research":         step_research,
     "writing":          step_writing,
     "polish":           step_polish,
-    "links":            step_links,
     "output":           step_output,
 }

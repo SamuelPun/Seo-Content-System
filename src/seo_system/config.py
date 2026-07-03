@@ -36,7 +36,6 @@ STEPS = [
     "research",          # fetch_url (sources) → sources/
     "writing",           # Claude Code session → draft.md (+ banned phrase gate)
     "polish",            # scan scripts + Claude Code → editorial + mechanical cleanup → draft.md polished
-    "links",             # build_page_index (incremental) + match_internal_links → candidates.json
     "output",            # validate_meta + generate_schema + build_output + generate_checklist → final.html + publish-checklist.md
 ]
 

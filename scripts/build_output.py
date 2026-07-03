@@ -23,10 +23,7 @@ def md_to_html(text):
     )
 
 
-def build_html(title, description, url, body_html, schemas, internal_links):
-    # Inject internal links as data attribute on body for CMS use
-    links_json = json.dumps(internal_links or [])
-
+def build_html(title, description, url, body_html, schemas):
     schema_tags = ""
     for schema in (schemas or []):
         schema_tags += f'\n<script type="application/ld+json">\n{json.dumps(schema, indent=2)}\n</script>'
@@ -40,7 +37,7 @@ def build_html(title, description, url, body_html, schemas, internal_links):
   <meta name="description" content="{description}">
   <link rel="canonical" href="{url}">{schema_tags}
 </head>
-<body data-internal-link-candidates='{links_json}'>
+<body>
 
 {body_html}
 
@@ -57,7 +54,6 @@ def run(workspace: Path) -> bool:
     draft_path   = editorial_dir / "draft.md"
     meta_path    = data_dir / "meta.json"
     schema_path  = data_dir / "schema.json"
-    links_path   = data_dir / "internal-link-candidates.json"
 
     if not draft_path.exists():
         print(f"ERROR: editorial/draft.md not found in {workspace}", file=sys.stderr)
@@ -65,10 +61,9 @@ def run(workspace: Path) -> bool:
 
     print(f"[INFO] Building output from {workspace}")
 
-    draft_text     = draft_path.read_text(encoding="utf-8")
-    meta           = load_json(meta_path)
-    schemas        = load_json(schema_path)
-    internal_links = load_json(links_path)
+    draft_text = draft_path.read_text(encoding="utf-8")
+    meta       = load_json(meta_path)
+    schemas    = load_json(schema_path)
 
     title       = (meta or {}).get("title")       or "Untitled"
     description = (meta or {}).get("description") or ""
@@ -76,7 +71,7 @@ def run(workspace: Path) -> bool:
 
     body_html = md_to_html(draft_text)
 
-    html = build_html(title, description, url, body_html, schemas, internal_links)
+    html = build_html(title, description, url, body_html, schemas)
 
     out_path = publish_dir / "final.html"
     out_path.write_text(html, encoding="utf-8")
@@ -89,7 +84,6 @@ def run(workspace: Path) -> bool:
     print(f"  URL:         {url}")
     print(f"  Word count:  {word_count}")
     print(f"  Schemas:     {len(schemas) if schemas else 0}")
-    print(f"  Int. links:  {len(internal_links) if internal_links else 0} candidates embedded")
     print(f"  Output:      {out_path}")
     return True
 
