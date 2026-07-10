@@ -143,7 +143,7 @@ def main():
     print("    2. Review brand/audience-profiles.md — fill any gaps")
     print("    3. Review brand/content-prefs.md — confirm format and headline preferences")
     print("    4. Run your first article:")
-    print(f"       python3 run_workflow.py --client {client_slug} --article \"your keyword\" --step all")
+    print(f"       run-workflow --client {client_slug} --article \"your keyword\" --step all")
     print()
 
 

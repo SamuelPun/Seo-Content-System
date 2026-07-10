@@ -128,7 +128,7 @@ def main() -> None:
     for i in range(1, 11):
         page_file = pages_dir / f"{i}.md"
         if not page_file.exists():
-            break
+            continue
         content = page_file.read_text(encoding="utf-8")
         summary = _summarise_page(content)
         summary["position"] = i
@@ -141,7 +141,7 @@ def main() -> None:
     out_path = out_dir / "serp-summaries.json"
     out_path.write_text(json.dumps(summaries, indent=2, ensure_ascii=False), encoding="utf-8")
 
-    total_in  = sum((pages_dir / f"{i}.md").stat().st_size for i in range(1, len(summaries) + 1))
+    total_in  = sum((pages_dir / f"{s['position']}.md").stat().st_size for s in summaries)
     total_out = out_path.stat().st_size
     print(
         f"[summarise_serp_pages] {len(summaries)} pages → {out_path.name} "

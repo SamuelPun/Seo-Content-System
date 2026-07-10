@@ -68,3 +68,12 @@ def load_client_profile(client_dir: Path) -> str | None:
         return None
     m = re.search(r'\*\*Sitemap index:\*\*\s*(\S+)', profile_path.read_text(encoding="utf-8"))
     return m.group(1).strip() if m else None
+
+
+def load_client_market(client_dir: Path) -> str:
+    """Return the two-letter search market from profile.md, or 'us' if unset."""
+    profile_path = client_dir / "profile.md"
+    if not profile_path.exists():
+        return "us"
+    m = re.search(r'\*\*Search market:\*\*\s*(\S+)', profile_path.read_text(encoding="utf-8"))
+    return m.group(1).strip().lower() if m else "us"

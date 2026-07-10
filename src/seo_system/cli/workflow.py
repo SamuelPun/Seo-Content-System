@@ -17,6 +17,7 @@ from seo_system.config import (
     HUMAN_GATES,
     STEPS,
     get_content_base,
+    load_client_market,
     load_client_profile,
     normalise_slug,
 )
@@ -66,6 +67,7 @@ def main():
         content_dir=content_dir,
         brand_dir=brand_dir,
         sitemap_url=load_client_profile(client_dir),
+        market=load_client_market(client_dir),
     )
 
     display_name = args.article

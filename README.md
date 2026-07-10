@@ -8,8 +8,6 @@ AI-assisted SEO content production pipeline. Chains SERP research, Claude Code s
 
 ```
 seo-content-system/
-  run_workflow.py          ← CLI launcher (python3 run_workflow.py ...)
-  onboard_client.py        ← CLI launcher (python3 onboard_client.py ...)
   pyproject.toml           ← dependencies, CLI entry points, lint/test config
 
   src/seo_system/          ← installed Python package
@@ -85,53 +83,58 @@ $CONTENT_BASE/
 
 ## Setup
 
+There are no `run_workflow.py` / `onboard_client.py` scripts anymore — installing the
+package puts `run-workflow` and `onboard-client` commands on your PATH.
+
 ```bash
-# 1. Install dependencies (creates CLI commands)
+# 1. Install the package (creates the CLI commands below)
 pip install -e .
 
-# 2. Set required env vars in .env
+# 2. Set required env vars in .env (repo root)
 CONTENT_BASE=/path/to/your/client/data
 AHREFS_API_KEY=your_key_here
 
-# 3. Confirm Claude Code CLI is available
+# 3. Confirm the Claude Code CLI is installed and logged in —
+#    every skill-based step (angle, headline-outline, writing, polish)
+#    shells out to `claude --print`
 which claude
 ```
+
+**Run these commands in a real terminal window** (Terminal.app, iTerm, etc.), not
+through a tool that can't provide interactive stdin. The `keyword` step and every
+`[GATE]` step below call Python's `input()` to prompt you — if stdin isn't a TTY
+you'll get `EOFError: EOF when reading a line` instead of a prompt.
 
 ---
 
 ## Onboard a new client
 
 ```bash
-python3 onboard_client.py --client monx
-# or
 onboard-client --client monx
 ```
 
-Creates the full client folder structure and generates brand voice + audience profile files via Claude.
+Creates the full client folder structure and generates brand voice + audience profile files via Claude. Prompts you through a Q&A session, so run it interactively.
 
 ---
 
 ## Run the article workflow
 
 ```bash
-# Full run
-python3 run_workflow.py --client monx --article "us expat tax" --step all
+# Full run — will pause at each [GATE] step below for your input
+run-workflow --client monx --article "us expat tax" --step all
 
 # Single step
-python3 run_workflow.py --client monx --article "us expat tax" --step keyword
+run-workflow --client monx --article "us expat tax" --step keyword
 
-# Resume from a step
-python3 run_workflow.py --client monx --article "us expat tax" --from headline-outline
+# Resume from a step (skips earlier completed steps)
+run-workflow --client monx --article "us expat tax" --from headline-outline
 
-# Force re-run a completed step
-python3 run_workflow.py --client monx --article "us expat tax" --step audit --force
+# Force re-run a step that's already marked complete
+run-workflow --client monx --article "us expat tax" --step polish --force
 ```
 
-Installed CLI commands work identically:
-
-```bash
-run-workflow --client monx --article "us expat tax" --step all
-```
+The article name (`--article`) can be plain English — it's slugified automatically
+(e.g. `"us expat tax"` → `us-expat-tax`).
 
 ---
 
@@ -139,15 +142,13 @@ run-workflow --client monx --article "us expat tax" --step all
 
 | Step | What it does |
 |---|---|
-| `keyword` | Fetches SERP data and top-10 pages via Ahrefs + fetch_url |
-| `angle` | **[GATE]** Claude proposes angle; you review/override |
-| `headline-outline` | **[GATE]** Fetches sitemap; Claude generates headline options |
-| `research` | **[GATE]** Claude gathers authoritative sources |
-| `writing` | Claude writes the full draft |
-| `audit` | Scans banned phrases + rhythm; Claude self-audits |
-| `revision` | **[GATE]** Claude applies final revisions |
-| `links` | Matches internal link candidates from page index |
-| `output` | Generates meta, schema, and final.html |
+| `keyword` | Prompts for the target keyword, fetches SERP data + top-10 pages via Ahrefs |
+| `angle` | **[GATE]** Claude proposes an angle; you review/override |
+| `headline-outline` | **[GATE]** Fetches sitemap; Claude generates headline options + outline |
+| `research` | **[GATE]** Claude gathers authoritative sources into `data/sources/` |
+| `writing` | Claude writes the full draft (hard-fails on HIGH severity banned phrases) |
+| `polish` | **[GATE]** Scans banned phrases + rhythm, then Claude does an editorial pass |
+| `output` | Generates meta, schema.json, final.html, and the publish checklist |
 
 ---
 

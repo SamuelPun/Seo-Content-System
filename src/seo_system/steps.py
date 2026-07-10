@@ -18,6 +18,7 @@ class RunContext:
     content_dir: Path
     brand_dir: Path
     sitemap_url: str | None = None
+    market: str = "us"
 
 
 def get_keyword(ctx: RunContext, article: str) -> str:
@@ -43,7 +44,7 @@ def step_keyword(ctx: RunContext, article: str) -> bool:
     serp_pages_dir = data_dir / "serp-pages"
     serp_pages_dir.mkdir(parents=True, exist_ok=True)
 
-    ok = run_script("fetch_serp.py", ["--keyword", kw, "--out-dir", str(data_dir)])
+    ok = run_script("fetch_serp.py", ["--keyword", kw, "--country", ctx.market, "--out-dir", str(data_dir)])
     if not ok:
         return False
 
