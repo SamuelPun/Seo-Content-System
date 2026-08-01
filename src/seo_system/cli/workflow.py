@@ -7,7 +7,7 @@ Usage:
     python3 run_workflow.py --client monx --article "us-expat-tax" --step all
     python3 run_workflow.py --client monx --article "us-expat-tax" --step keyword
     python3 run_workflow.py --client monx --article "us-expat-tax" --from headline-outline
-    python3 run_workflow.py --client monx --article "us-expat-tax" --step audit --force
+    python3 run_workflow.py --client monx --article "us-expat-tax" --step polish --force
 """
 
 import argparse

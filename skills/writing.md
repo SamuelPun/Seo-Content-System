@@ -36,7 +36,7 @@ The outline is your brief — not a contract. If you discover mid-draft that a s
 |---|---|
 | `EDITORIAL_DIR/outline.md` | Your section-by-section brief — follow this structure |
 | `EDITORIAL_DIR/angle.md` | The editorial position — every paragraph must serve this angle |
-| `DATA_DIR/sources/index.json` | Research index — which sources support which sections |
+| `DATA_DIR/sources/index.json` | Research index — which sources support which sections, plus any `gaps` (sections with no ideal source and a documented workaround) |
 | `DATA_DIR/sources/[slug].md` | Individual source files — read before writing the section that uses each one |
 | `DATA_DIR/keyword.json` | Target keyword and PAA questions |
 | `BRAND_DIR/brand-voice-card.md` | Brand voice — tone, vocabulary, sentence patterns |
@@ -118,6 +118,7 @@ After a dense explanatory paragraph, consider a short connector sentence that re
 - Use sources from `sources/` — cite naturally in prose, not as footnotes
 - Use exact figures from source files — do not round or paraphrase statistics
 - Do not invent data. If you cannot support a claim with a source, write around it or flag it with `[SOURCE NEEDED]`
+- Before drafting a section, check `index.json`'s `gaps` array for an entry naming that section — if one exists, apply its documented `workaround` instead of improvising one
 
 **Moving from source extract to natural prose — three approaches:**
 1. **Claim first, figure second:** State the point in your own words, then ground it with the specific number. *"Most expats underestimate their filing obligations. According to HMRC, X% of..."*
@@ -197,6 +198,8 @@ Before writing the final line, re-read the full draft and verify:
 - [ ] Every section from the outline is present
 - [ ] Every table-stakes topic from `keyword.json` is covered
 - [ ] Every PAA question is answered
+- [ ] Every section flagged "Authority signal needed" in the outline either cites a source or has a matching entry in `sources/index.json`'s `gaps` array
+- [ ] Every content device section uses the specific scenario, numbers, and key moment from its outline execution sketch — not a generic version
 - [ ] Every heading using the target keyword matches the chosen headline's grammatical form (singular/plural, hyphenation, spelling) unless a specific heading is grammatically forced otherwise
 - [ ] Each section's content stays within its outline-assigned "New in this section" scope — no fact fully explained in more than one section
 - [ ] The angle from `angle.md` is visible throughout — not just in the intro
@@ -204,6 +207,7 @@ Before writing the final line, re-read the full draft and verify:
 - [ ] No AI structural patterns (throat-clearing, parallel list overuse, restated questions)
 - [ ] No em dashes
 - [ ] Brand voice consistent with `brand-voice-card.md`
+- [ ] Opening pattern, teaching style, and signature vocabulary consistent with `voice-dna.md`, if it exists
 - [ ] All sources cited are from `DATA_DIR/sources/` — no invented data
 - [ ] Word count within 10% of target
 
@@ -218,4 +222,4 @@ When `draft.md` is written and the quality check is complete, end with:
 > Sections: [N]
 > Sources cited: [N]
 >
-> No human gate — workflow continues automatically to audit.
+> No human gate — workflow continues automatically to polish.

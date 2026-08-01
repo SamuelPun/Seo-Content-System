@@ -92,7 +92,7 @@ def init_article_files(slug: str, workspace_path: Path, display_name: str = None
         work_log_path.write_text(
             f"# Work Log — {label}\n"
             "*Append-only. Written by every skill step and the orchestrator. Never edited — only added to.*\n"
-            "*Read by: human editor at any gate, revision skill before final pass.*\n\n"
+            "*Read by: human editor at any gate, polish skill before final pass.*\n\n"
             f"---\nstep: init | {timestamp} | status: complete\n---\n"
             f"Workspace created for {label}. work-log.md and writer-notes.md initialised.\n\n"
         )
@@ -102,8 +102,8 @@ def init_article_files(slug: str, workspace_path: Path, display_name: str = None
         writer_notes_path.write_text(
             f"# Writer Notes — {label}\n"
             "*Append-only. Written on instinct — not on a schedule. Short, unpolished, honest.*\n"
-            "*Written by: writing skill, audit skill, human editor (at revision gate).*\n"
-            "*Read by: revision skill before final pass. Human editor after the run for system improvement.*\n\n"
+            "*Written by: writing skill, human editor.*\n"
+            "*Read by: polish skill before final pass. Human editor after the run for system improvement.*\n\n"
             "---\n\n"
         )
 
