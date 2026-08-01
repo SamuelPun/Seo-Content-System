@@ -18,7 +18,6 @@ from seo_system.config import (
     STEPS,
     get_content_base,
     load_client_market,
-    load_client_profile,
     normalise_slug,
 )
 from seo_system.gates import interactive_gate
@@ -66,7 +65,6 @@ def main():
     ctx = RunContext(
         content_dir=content_dir,
         brand_dir=brand_dir,
-        sitemap_url=load_client_profile(client_dir),
         market=load_client_market(client_dir),
     )
 

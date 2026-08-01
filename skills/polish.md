@@ -63,6 +63,10 @@ These are your most honest signal. Write them before the checklist.
 
 **Logic gaps:** does each section follow logically from the one before? Are there claims a sceptical reader would push back on that the article doesn't address?
 
+**Keyword-form consistency:** scan every H2/H3 for the target keyword's core noun. If a heading's singular/plural, hyphenation, or spelling differs from the form used in the chosen headline, check whether that specific heading is grammatically forced into the different form. If it's a free choice, make it match the headline's form. This applies to every heading present now, including ones added or edited during this pass — a heading touched today does not skip the check.
+
+**Sequence fidelity:** does the introduction promise a specific order, structure, or set of steps? If a later section delivers something in a different order, or a heading doesn't match the flow the intro set up, fix the mismatch — realign the sections or rewrite the intro's promise.
+
 **Voice DNA match** (if `voice-dna.md` exists): does the opening pattern, teaching style, and signature vocabulary match what was observed in real posts?
 
 **Conclusion:** does it consolidate the angle, or just summarise sections? Is the CTA specific and genuinely useful?
@@ -71,7 +75,7 @@ These are your most honest signal. Write them before the checklist.
 
 ### Step 4 — Fix editorial issues
 
-Make direct edits to `draft.md` for everything you can fix. Fix, don't just flag. Only escalate to the human via `revision-notes.md` when fixing requires information only the brand has, or would reverse a deliberate human decision.
+Make direct edits to `draft.md` for everything you can fix. Fix, don't just flag. Before saving any fix to a heading, opening sentence, or definition, read the sentence or heading immediately before and after it — a fix made without checking its neighbors is how sequence mismatches and keyword-form drift get introduced during editing itself, not just inherited from the draft. Only escalate to the human via `revision-notes.md` when fixing requires information only the brand has, or would reverse a deliberate human decision.
 
 ---
 

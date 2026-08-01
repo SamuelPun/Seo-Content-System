@@ -15,7 +15,7 @@ seo-content-system/
     workspace.py           ← article log I/O, step state tracking
     runner.py              ← subprocess wrappers (scripts + Claude Code)
     gates.py               ← interactive human-gate prompts
-    steps.py               ← RunContext + all 9 step functions
+    steps.py               ← RunContext + all 7 step functions
     cli/
       workflow.py          ← main() for run_workflow
       onboard.py           ← main() for onboard_client
@@ -30,8 +30,7 @@ seo-content-system/
     headline-and-outline.md
     research-authority.md
     writing.md
-    audit.md
-    revision.md
+    polish.md
     output.md
     content-devices.md     ← shared content device library
     content-standards.md   ← universal structural standards
@@ -39,11 +38,8 @@ seo-content-system/
   scripts/                 ← standalone utility scripts
     fetch_serp.py
     fetch_url.py
-    fetch_sitemap.py
     scan_banned_phrases.py
     analyse_rhythm.py
-    match_internal_links.py
-    build_page_index.py
     generate_schema.py
     validate_meta.py
     build_output.py
@@ -144,7 +140,7 @@ The article name (`--article`) can be plain English — it's slugified automatic
 |---|---|
 | `keyword` | Prompts for the target keyword, fetches SERP data + top-10 pages via Ahrefs |
 | `angle` | **[GATE]** Claude proposes an angle; you review/override |
-| `headline-outline` | **[GATE]** Fetches sitemap; Claude generates headline options + outline |
+| `headline-outline` | **[GATE]** Claude generates headline options + outline |
 | `research` | **[GATE]** Claude gathers authoritative sources into `data/sources/` |
 | `writing` | Claude writes the full draft (hard-fails on HIGH severity banned phrases) |
 | `polish` | **[GATE]** Scans banned phrases + rhythm, then Claude does an editorial pass |

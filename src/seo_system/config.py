@@ -32,7 +32,7 @@ BRAND_TMPL  = REPO_DIR / "brand"  # de-ai-guidelines.md lives here
 STEPS = [
     "keyword",           # fetch_serp + fetch_url (SERP pages) → serp-urls.json, serp-pages/
     "angle",             # Claude Code session → angle.md
-    "headline-outline",  # fetch_sitemap + Claude Code session → headline.md, outline.md
+    "headline-outline",  # Claude Code session → headline.md, outline.md
     "research",          # fetch_url (sources) → sources/
     "writing",           # Claude Code session → draft.md (+ banned phrase gate)
     "polish",            # scan scripts + Claude Code → editorial + mechanical cleanup → draft.md polished
@@ -59,15 +59,6 @@ def get_content_base() -> Path:
         print("ERROR: CONTENT_BASE is not set. Add it to .env or export it before running.")
         sys.exit(1)
     return Path(val)
-
-
-def load_client_profile(client_dir: Path) -> str | None:
-    """Return the sitemap URL from profile.md, or None."""
-    profile_path = client_dir / "profile.md"
-    if not profile_path.exists():
-        return None
-    m = re.search(r'\*\*Sitemap index:\*\*\s*(\S+)', profile_path.read_text(encoding="utf-8"))
-    return m.group(1).strip() if m else None
 
 
 def load_client_market(client_dir: Path) -> str:

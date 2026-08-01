@@ -17,7 +17,6 @@ from seo_system.workspace import load_log, save_log, workspace
 class RunContext:
     content_dir: Path
     brand_dir: Path
-    sitemap_url: str | None = None
     market: str = "us"
 
 
@@ -84,27 +83,6 @@ def step_headline_outline(ctx: RunContext, article: str) -> bool:
     ws = workspace(ctx.content_dir, article)
     print()
     seed = input("  Your headline idea (Enter for Claude's options): ").strip()
-
-    data_dir = ws / "data"
-    data_dir.mkdir(parents=True, exist_ok=True)
-
-    page_index = ctx.brand_dir / "page-index.json"
-    if page_index.exists():
-        index = json.loads(page_index.read_text(encoding="utf-8"))
-        candidates = [{"url": p["url"], "lastmod": p.get("lastmod")} for p in index.get("pages", [])]
-        (data_dir / "sitemap-candidates.json").write_text(
-            json.dumps(candidates, indent=2), encoding="utf-8"
-        )
-        print_status(f"sitemap-candidates built from brand/page-index.json ({len(candidates)} pages)", "ok")
-    else:
-        sitemap_args = ["--out-dir", str(data_dir)]
-        if ctx.sitemap_url:
-            sitemap_args += ["--sitemap-url", ctx.sitemap_url]
-        ok = run_script("fetch_sitemap.py", sitemap_args)
-        if not ok:
-            print_status("fetch_sitemap failed — sitemap-candidates.json will be missing; links step will fail", "error")
-            return False
-
     return run_claude_skill("headline-and-outline.md", ws, ctx.brand_dir, seed=seed or None)
 
 

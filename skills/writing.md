@@ -121,7 +121,11 @@ Never paraphrase in a way that shifts the meaning. If the source says "up to 30%
 
 ### SEO mechanics
 - Use the target keyword in the first 100 words, naturally
-- Use the keyword or close variants in at least 2–3 H2 headings
+- Use the keyword or close variants in at least 2–3 H2 headings — but keep the
+  keyword's core noun in the same grammatical form (singular/plural,
+  hyphenation, spelling) as the chosen headline in every heading that uses it,
+  unless that specific heading is grammatically forced into a different form.
+  A heading you add or edit later in the draft does not skip this check.
 - Do not keyword-stuff — if it reads awkwardly, rephrase
 - Answer PAA questions with a direct sentence followed by elaboration
 
@@ -185,6 +189,7 @@ Before writing the final line, re-read the full draft and verify:
 
 - [ ] Every section from the outline is present
 - [ ] Every PAA question is answered
+- [ ] Every heading using the target keyword matches the chosen headline's grammatical form (singular/plural, hyphenation, spelling) unless a specific heading is grammatically forced otherwise
 - [ ] The angle from `angle.md` is visible throughout — not just in the intro
 - [ ] No banned vocabulary (see `de-ai-rules-card.md`)
 - [ ] No AI structural patterns (throat-clearing, parallel list overuse, restated questions)
