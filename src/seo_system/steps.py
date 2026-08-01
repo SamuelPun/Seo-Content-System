@@ -106,7 +106,13 @@ def step_research(ctx: RunContext, article: str) -> bool:
         if not sources:
             print_status("data/sources/index.json exists but contains no sources — research produced nothing", "error")
             return False
-        print_status(f"sources verified: {len(sources)} source(s) in index", "ok")
+
+        missing = [s["id"] for s in sources if not (sources_dir / f"{s['id']}.md").exists()]
+        if missing:
+            print_status(f"index.json lists sources with no matching file: {', '.join(missing)}", "error")
+            return False
+
+        print_status(f"sources verified: {len(sources)} source(s) in index, all files present", "ok")
     except (json.JSONDecodeError, Exception) as e:
         print_status(f"data/sources/index.json is not valid JSON: {e}", "error")
         return False
