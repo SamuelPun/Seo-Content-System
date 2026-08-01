@@ -61,7 +61,7 @@ These are your most honest signal. Write them before the checklist.
 
 **Content devices:** find each device section. Is it executed fully and specifically — vivid, surprising, real? If it feels phoned in, flag it.
 
-**Logic gaps:** does each section follow logically from the one before? Are there claims a sceptical reader would push back on that the article doesn't address?
+**Logic gaps:** does the draft's actual section order and content match the sequence validated in `outline.md`? For any point where `writer-notes.md` logs a deviation from the outline, check specifically whether that deviation reintroduced a duplicated fact or an out-of-order dependency the outline check had already ruled out. Are there claims a sceptical reader would push back on that the article doesn't address?
 
 **Keyword-form consistency:** scan every H2/H3 for the target keyword's core noun. If a heading's singular/plural, hyphenation, or spelling differs from the form used in the chosen headline, check whether that specific heading is grammatically forced into the different form. If it's a free choice, make it match the headline's form. This applies to every heading present now, including ones added or edited during this pass — a heading touched today does not skip the check.
 

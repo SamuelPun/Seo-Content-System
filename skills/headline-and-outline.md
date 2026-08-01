@@ -156,7 +156,11 @@ The outline is the writer's brief. It must be detailed enough that the writer ne
 - Flag where external authority sources should go
 - Content devices must be embedded as named sections — not added as an afterthought
 
-**Redundancy check:** After drafting all sections, identify any core fact that appears in more than two sections. Consolidate it. One explanation done well beats three explanations across different formats.
+**Sequence & Ownership check:** Once every section has its `New in this section` field filled in, check the skeleton (`Purpose` + `New in this section`, read in section order) before writing any prose:
+1. No two sections claim the same fact. Every fact named in a "New in this section" field appears in exactly one section — if a second section needs it, that section references the owning section instead of re-claiming it.
+2. No section depends on something not yet established. If a section's content requires understanding concept X, X must already be an earlier section's "New in this section" — never a later one's.
+
+Fix violations by reordering or consolidating sections now, while it's free — not after the draft is written.
 
 Write `outline.md` to EDITORIAL_DIR:
 
@@ -209,8 +213,7 @@ source_strategy: evidence | lifestyle | lifestyle+evidence
 ## [Section heading] (~[N] words)
 **Purpose:** [What this section does for the reader]
 **Serves:** [Which reader type(s). If not all readers: "Readers who [description] can skip this."]
-**Key points:**
-- ...
+**New in this section:** [The one fact, claim, or mechanism this section — and only this section — explains in full]
 **PAA question addressed:** [if applicable]
 **Authority signal needed:** [specific data point or source type]
 **Content device:** [if applicable — name it and describe what it should produce]

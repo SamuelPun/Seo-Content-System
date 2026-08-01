@@ -93,6 +93,13 @@ If a section's word count genuinely cannot be hit without padding, write it well
 
 **How-to articles:** When the article walks the reader through a genuine process, use numbered step headers: `## Step N. [Short active label]`. Do not use numbered steps for educational articles where sections are independent.
 
+### Transitions and ownership
+Before opening each section after the first, reread what you've already written in `draft.md`. Open the new section by using the most relevant established fact as a load-bearing premise — not by announcing the transition. This is a real distinction, not a stylistic nuance: the wrong version of this *is* the already-banned throat-clearing pattern.
+- Wrong (announces the transition): "Now that we've covered the 30% default, let's look at the two routes to zero."
+- Right (uses the prior fact as a premise): "Two separate mechanisms can take that 30% to zero — a tax treaty, and a domestic exemption that doesn't need one."
+
+A section may only fully explain the fact assigned to it in the outline's "New in this section" field. It may reference a fact owned by another section in short form, never re-explain it from scratch.
+
 ### Voice and tone
 - Apply `brand-voice-card.md` throughout — non-negotiable
 - Write for the target reader in `angle.md` — their situation, vocabulary, expertise level
@@ -190,6 +197,7 @@ Before writing the final line, re-read the full draft and verify:
 - [ ] Every section from the outline is present
 - [ ] Every PAA question is answered
 - [ ] Every heading using the target keyword matches the chosen headline's grammatical form (singular/plural, hyphenation, spelling) unless a specific heading is grammatically forced otherwise
+- [ ] Each section's content stays within its outline-assigned "New in this section" scope — no fact fully explained in more than one section
 - [ ] The angle from `angle.md` is visible throughout — not just in the intro
 - [ ] No banned vocabulary (see `de-ai-rules-card.md`)
 - [ ] No AI structural patterns (throat-clearing, parallel list overuse, restated questions)
