@@ -195,6 +195,7 @@ status: draft
 Before writing the final line, re-read the full draft and verify:
 
 - [ ] Every section from the outline is present
+- [ ] Every table-stakes topic from `keyword.json` is covered
 - [ ] Every PAA question is answered
 - [ ] Every heading using the target keyword matches the chosen headline's grammatical form (singular/plural, hyphenation, spelling) unless a specific heading is grammatically forced otherwise
 - [ ] Each section's content stays within its outline-assigned "New in this section" scope — no fact fully explained in more than one section

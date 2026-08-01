@@ -1,10 +1,10 @@
 ---
 name: output
-description: "Steps 9-10 — generates meta.json, schema.json, final.html, and publish checklist."
+description: "Step 8 — generates meta.json, schema.json, final.html, and publish checklist."
 ---
 
 # Skill: Output
-*Steps 9–10 of the SEO Content System*
+*Step 8 of the SEO Content System*
 
 ---
 
