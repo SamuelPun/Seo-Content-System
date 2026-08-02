@@ -167,7 +167,8 @@ def _generate(workspace: Path) -> None:
             if isinstance(schema, list):
                 schema = schema[0] if schema else {}
             schema_type = schema.get("@type", "unknown")
-            required    = ["headline", "datePublished", "author", "publisher", "description"]
+            # author is optional — generate_schema.py only sets it when meta.json supplies one
+            required    = ["headline", "datePublished", "publisher", "description"]
             missing     = [f for f in required if not schema.get(f)]
             ok, line    = _check(
                 not missing,

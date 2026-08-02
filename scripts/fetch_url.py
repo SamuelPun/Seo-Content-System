@@ -29,6 +29,7 @@ from pathlib import Path
 
 try:
     import trafilatura
+    from trafilatura.settings import use_config
 except ImportError:
     print("ERROR: trafilatura is not installed. Run: pip install trafilatura", file=sys.stderr)
     sys.exit(1)
@@ -47,7 +48,10 @@ def fetch_to_markdown(url: str, timeout: int = 15) -> str | None:
     - Main content extraction
     - Markdown formatting
     """
-    downloaded = trafilatura.fetch_url(url)
+    config = use_config()
+    config.set("DEFAULT", "DOWNLOAD_TIMEOUT", str(timeout))
+
+    downloaded = trafilatura.fetch_url(url, config=config)
     if not downloaded:
         return None
 
