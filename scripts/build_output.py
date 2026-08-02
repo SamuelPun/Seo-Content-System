@@ -1,4 +1,5 @@
 import argparse
+import html
 import json
 import sys
 from pathlib import Path
@@ -26,7 +27,12 @@ def md_to_html(text):
 def build_html(title, description, url, body_html, schemas):
     schema_tags = ""
     for schema in (schemas or []):
-        schema_tags += f'\n<script type="application/ld+json">\n{json.dumps(schema, indent=2)}\n</script>'
+        schema_json = json.dumps(schema, indent=2).replace("</script>", "<\\/script>")
+        schema_tags += f'\n<script type="application/ld+json">\n{schema_json}\n</script>'
+
+    title = html.escape(title)
+    description = html.escape(description)
+    url = html.escape(url)
 
     return f"""<!DOCTYPE html>
 <html lang="en">

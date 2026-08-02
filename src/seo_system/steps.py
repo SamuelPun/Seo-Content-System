@@ -150,7 +150,7 @@ def _validate_banned_phrases(ws: Path, data_dir: Path) -> bool:
     return True
 
 
-def _seed_publisher_meta(ctx: RunContext, data_dir: Path) -> None:
+def _seed_publisher_meta(ctx: RunContext, data_dir: Path, article: str) -> None:
     profile = ctx.brand_dir.parent / "profile.md"
     if not profile.exists():
         return
@@ -166,8 +166,11 @@ def _seed_publisher_meta(ctx: RunContext, data_dir: Path) -> None:
             existing = json.loads(meta_path.read_text(encoding="utf-8"))
         except json.JSONDecodeError:
             pass
+    site_url = url_m.group(1).strip().rstrip("/")
     existing["publisher_name"] = name_m.group(1).strip()
-    existing["site_url"] = url_m.group(1).strip()
+    existing["site_url"] = site_url
+    if not existing.get("url"):
+        existing["url"] = f"{site_url}/blog/{article}/"
     meta_path.write_text(json.dumps(existing, indent=2, ensure_ascii=False), encoding="utf-8")
 
 
@@ -221,7 +224,7 @@ def step_output(ctx: RunContext, article: str) -> bool:
         print_status("editorial/draft.md not found", "error")
         return False
 
-    _seed_publisher_meta(ctx, data_dir)
+    _seed_publisher_meta(ctx, data_dir, article)
     ok = run_script("validate_meta.py", ["--draft", str(draft), "--out-dir", str(data_dir)])
     if not ok:
         return False
