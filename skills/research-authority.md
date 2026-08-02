@@ -131,7 +131,7 @@ For each source in the index, write `DATA_DIR/sources/[source-slug].md`:
 
 ## Step 5 — Flag any gaps
 
-If you cannot find a credible source for something flagged in the outline, say so explicitly. Do not substitute a weak source for a strong one. Note:
+If you cannot find a credible source for anything identified in Step 1 — an outline "Authority signal needed" flag, an angle claim needing evidential backing, or a PAA question needing a citable answer — say so explicitly. Do not substitute a weak source for a strong one. Note:
 - What the gap is
 - What kind of source would fill it
 - Whether the section can still be written credibly without it
