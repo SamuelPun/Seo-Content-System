@@ -54,6 +54,36 @@ def is_complete(content_dir: Path, article: str, step: str) -> bool:
     return log.get("steps", {}).get(step, {}).get("status") == "complete"
 
 
+def mark_substep_complete(content_dir: Path, article: str, step: str, substep: str):
+    """Checkpoint one role within a multi-role step (e.g. angle, headline-outline).
+
+    Lets step_angle/step_headline_outline resume at the next unfinished role
+    instead of redoing the whole step after an interruption.
+    """
+    log = load_log(content_dir, article)
+    entry = log["steps"].setdefault(step, {"status": "running"})
+    entry.setdefault("substeps", {})[substep] = {
+        "status": "complete",
+        "completed_at": datetime.now(timezone.utc).isoformat(),
+    }
+    save_log(content_dir, article, log)
+
+
+def completed_substeps(content_dir: Path, article: str, step: str) -> set[str]:
+    """Names of roles already checkpointed complete for this step."""
+    log = load_log(content_dir, article)
+    substeps = log.get("steps", {}).get(step, {}).get("substeps", {})
+    return {name for name, info in substeps.items() if info.get("status") == "complete"}
+
+
+def reset_substeps(content_dir: Path, article: str, step: str):
+    """Wipe substep checkpoints — used by --force to restart a step from role 1."""
+    log = load_log(content_dir, article)
+    if step in log.get("steps", {}):
+        log["steps"][step]["substeps"] = {}
+        save_log(content_dir, article, log)
+
+
 def update_content_index(content_dir: Path):
     """Regenerate _index.md in content_dir from all article log.json files."""
     rows = []

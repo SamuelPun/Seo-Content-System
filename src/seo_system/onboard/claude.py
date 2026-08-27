@@ -61,7 +61,7 @@ The card must have these exact sections (use this structure):
 ---
 
 ## Editorial asides
-[Does this brand inject short informal opinion sentences at decision points — "honestly", "frankly", "let's be honest"? Describe when these appear (at a key decision, a surprising fact, a moment of validation) and what form they take. If this brand doesn't use editorial asides, say so explicitly.]
+[Does this brand inject short informal opinion sentences at decision points? Derive the actual marker words and sentence shape from the Q&A and any sample content — don't default to generic examples like "honestly" or "frankly"; find this brand's own equivalent. Describe when these appear (at a key decision, a surprising fact, a moment of validation) and what form they take, in this brand's own words. If this brand doesn't use editorial asides, say so explicitly.]
 
 ---
 
@@ -213,9 +213,11 @@ What is the dominant register? Cite a short passage as evidence.]
 ---
 
 ## Editorial asides
-[Do short informal opinion injections appear — "Honestly", "Frankly", "Let's be honest"? If so, \
-quote an example. Note what triggers them — a key decision point, a surprising fact, a validation \
-moment. If none appear in the articles, state that explicitly.]
+[Do short informal opinion injections appear? Don't search for the generic markers "Honestly"/ \
+"Frankly"/"Let's be honest" specifically — look for whatever this brand's own equivalent actually \
+is, evidenced in the text. If one appears, quote an example. Note what triggers them — a key \
+decision point, a surprising fact, a validation moment. If none appear in the articles, state that \
+explicitly.]
 
 ---
 

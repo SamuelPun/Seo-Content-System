@@ -1,5 +1,5 @@
 """
-Summarise SERP pages into a compact JSON file for the keyword-and-angle step.
+Summarise SERP pages into a compact JSON file for the angle stage.
 
 Reads serp-pages/1.md … N.md and extracts only what Claude needs for
 competitive analysis: headings, introduction, H2 section snippets, external

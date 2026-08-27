@@ -103,7 +103,8 @@ A section may only fully explain the fact assigned to it in the outline's "New i
 ### Voice and tone
 - Apply `brand-voice-card.md` throughout — non-negotiable
 - Write for the target reader in `angle.md` — their situation, vocabulary, expertise level
-- **Editorial asides at decision points:** At each key decision — a counterintuitive choice, a common mistake, a technique the reader must commit to — inject one short editorial sentence that signals you have a position. "Honestly, that's the bar." / "This is the decision most recipes skip." Rules: one per section maximum; use before or after the explanation, never in the middle of it; use "Honestly", "Frankly", "Let's be honest" — never "It's worth noting."
+- **Editorial asides at decision points:** At each key decision — a counterintuitive choice, a common mistake, a technique the reader must commit to — inject one short editorial sentence, in fresh wording specific to that decision, that signals you have a position. Rules: one per section maximum; use before or after the explanation, never in the middle of it; never "It's worth noting." Vary how you signal it sentence to sentence — don't lean on the same opener ("Honestly," / "Frankly," / "Here's the thing") across sections or across articles; a stance can show up in word choice and sentence shape without a tag word at all.
+- Quoted examples in `brand-voice-card.md`, `voice-dna.md`, or `content-devices.md` illustrate the *shape* of a pattern — never the words to insert. If a sentence you're about to write matches a reference file's example closely enough that you're basically retyping it, stop and write the actual content for this section instead.
 
 ### De-AI
 Apply `BRAND_DIR/de-ai-rules-card.md` in full. Three patterns that most commonly appear in first drafts:
@@ -188,6 +189,8 @@ status: draft
 *Sources used:*
 - [Source title]: [URL]
 ```
+
+The zero-em-dash rule applies to this Sources list too — if a source needs a descriptor, use a colon or parentheses (`Source title (descriptor): URL`), never `Source title — descriptor: URL`. This has caused a banned-phrase gate failure before; don't reintroduce it.
 
 ---
 

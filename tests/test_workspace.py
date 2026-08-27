@@ -3,12 +3,15 @@
 from pathlib import Path
 
 from seo_system.workspace import (
+    completed_substeps,
     init_article_files,
     is_complete,
     load_log,
     log_path,
     mark_complete,
     mark_pending,
+    mark_substep_complete,
+    reset_substeps,
     save_log,
     update_content_index,
     workspace,
@@ -97,6 +100,43 @@ def test_mark_pending_resets_status(tmp_path):
     assert is_complete(content_dir, "article-a", "keyword") is False
     log = load_log(content_dir, "article-a")
     assert log["steps"]["keyword"]["status"] == "pending"
+
+
+# ---------------------------------------------------------------------------
+# mark_substep_complete / completed_substeps / reset_substeps
+# ---------------------------------------------------------------------------
+
+def test_completed_substeps_empty_when_none_marked(tmp_path):
+    content_dir = make_content_dir(tmp_path)
+    assert completed_substeps(content_dir, "article-a", "angle") == set()
+
+
+def test_mark_substep_complete_roundtrip(tmp_path):
+    content_dir = make_content_dir(tmp_path)
+    mark_substep_complete(content_dir, "article-a", "angle", "angle-seo-research")
+    mark_substep_complete(content_dir, "article-a", "angle", "angle-writer-draft")
+    assert completed_substeps(content_dir, "article-a", "angle") == {
+        "angle-seo-research", "angle-writer-draft",
+    }
+
+
+def test_mark_substep_complete_does_not_affect_other_steps(tmp_path):
+    content_dir = make_content_dir(tmp_path)
+    mark_substep_complete(content_dir, "article-a", "angle", "angle-seo-research")
+    assert completed_substeps(content_dir, "article-a", "headline-outline") == set()
+
+
+def test_reset_substeps_clears_checkpoint(tmp_path):
+    content_dir = make_content_dir(tmp_path)
+    mark_substep_complete(content_dir, "article-a", "angle", "angle-seo-research")
+    reset_substeps(content_dir, "article-a", "angle")
+    assert completed_substeps(content_dir, "article-a", "angle") == set()
+
+
+def test_reset_substeps_on_untouched_step_is_a_noop(tmp_path):
+    content_dir = make_content_dir(tmp_path)
+    reset_substeps(content_dir, "article-a", "angle")  # should not raise
+    assert completed_substeps(content_dir, "article-a", "angle") == set()
 
 
 # ---------------------------------------------------------------------------

@@ -8,6 +8,7 @@ Usage:
     python3 run_workflow.py --client monx --article "us-expat-tax" --step keyword
     python3 run_workflow.py --client monx --article "us-expat-tax" --from headline-outline
     python3 run_workflow.py --client monx --article "us-expat-tax" --step polish --force
+    python3 run_workflow.py --client monx --article "us-expat-tax" --step keyword --keyword "us expat tax"
 """
 
 import argparse
@@ -45,6 +46,8 @@ def main():
                         help="Resume from this step (skips earlier completed steps)")
     parser.add_argument("--force",   action="store_true",
                         help="Re-run step even if already marked complete")
+    parser.add_argument("--keyword", default=None,
+                        help="Target keyword — set once, skips the interactive prompt from then on")
     args = parser.parse_args()
 
     content_base = get_content_base()
@@ -66,6 +69,8 @@ def main():
         content_dir=content_dir,
         brand_dir=brand_dir,
         market=load_client_market(client_dir),
+        keyword=args.keyword,
+        force=args.force,
     )
 
     display_name = args.article

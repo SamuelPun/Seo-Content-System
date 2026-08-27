@@ -10,7 +10,14 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from seo_system.runner import print_status, run_claude_skill, run_script
-from seo_system.workspace import load_log, save_log, workspace
+from seo_system.workspace import (
+    completed_substeps,
+    load_log,
+    mark_substep_complete,
+    reset_substeps,
+    save_log,
+    workspace,
+)
 
 
 @dataclass
@@ -18,16 +25,31 @@ class RunContext:
     content_dir: Path
     brand_dir: Path
     market: str = "us"
+    keyword: str | None = None  # supplied once via --keyword; skips the interactive prompt
+    force: bool = False
+
+
+def _prompt(msg: str) -> str:
+    """input() that degrades to '' instead of crashing when there's no TTY (e.g. run headlessly)."""
+    try:
+        return input(msg).strip()
+    except EOFError:
+        return ""
 
 
 def get_keyword(ctx: RunContext, article: str) -> str:
-    """Read keyword from log.json, or prompt user."""
+    """Read keyword from ctx.keyword override, log.json, or prompt (once) if neither is set."""
     log = load_log(ctx.content_dir, article)
-    kw = log.get("keyword", "").strip()
+    kw = (ctx.keyword or log.get("keyword", "")).strip()
     if not kw:
         label = log.get("display_name", article)
         print()
-        kw = input(f"  Enter the target keyword for '{label}': ").strip()
+        try:
+            kw = input(f"  Enter the target keyword for '{label}': ").strip()
+        except EOFError:
+            print_status("No keyword set and no input available — pass --keyword", "error")
+            raise SystemExit(1)
+    if kw != log.get("keyword", "").strip():
         log["keyword"] = kw
         save_log(ctx.content_dir, article, log)
     return kw
@@ -72,18 +94,93 @@ def step_keyword(ctx: RunContext, article: str) -> bool:
     return True
 
 
-def step_angle(ctx: RunContext, article: str) -> bool:
+def _read_editor_verdict(ws: Path) -> bool | None:
+    """Read editorial/editor-verdict.json. Returns the approved bool, or None if missing/invalid."""
+    verdict_path = ws / "editorial" / "editor-verdict.json"
+    if not verdict_path.exists():
+        return None
+    try:
+        data = json.loads(verdict_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return None
+    if "approved" not in data:
+        return None
+    return bool(data["approved"])
+
+
+# (checkpoint name, skill file, takes the seed, expected output files) — order matters,
+# each is a separate Claude session. Expected files are relative to editorial/.
+_ANGLE_SUBSTEPS = [
+    ("angle-seo-research", "angle-seo-research.md", False, ("research-brief.md",)),
+    ("angle-writer-draft", "angle-writer-draft.md", True, ("angle.md",)),
+    ("angle-reader-check", "angle-reader-check.md", False, ("reader-feedback.md",)),
+    ("angle-editor-review", "angle-editor-review.md", False, ("editor-verdict.json",)),
+]
+
+_OUTLINE_SUBSTEPS = [
+    ("outline-writer-draft", "outline-writer-draft.md", True, ("headline.md", "outline.md")),
+    ("outline-editor-review", "outline-editor-review.md", False, ("editor-verdict.json",)),
+    ("outline-reader-check", "outline-reader-check.md", False, ("reader-feedback.md",)),
+]
+
+
+def _run_substeps(ctx: RunContext, article: str, step: str, substeps: list, draft_name: str,
+                   revise_name: str, revise_skill: str, seed_prompt: str) -> bool:
+    """Run a multi-role stage, checkpointing after each role so a re-run resumes at the next
+    unfinished one instead of redoing the whole stage."""
     ws = workspace(ctx.content_dir, article)
-    print()
-    seed = input("  Your angle idea (Enter to let Claude analyse the SERP freely): ").strip()
-    return run_claude_skill("keyword-and-angle.md", ws, ctx.brand_dir, seed=seed or None)
+    if ctx.force:
+        reset_substeps(ctx.content_dir, article, step)
+    done = completed_substeps(ctx.content_dir, article, step)
+
+    seed = None
+    if draft_name not in done:
+        print()
+        seed = _prompt(seed_prompt) or None
+
+    for name, skill_file, uses_seed, expected_files in substeps:
+        if name in done:
+            continue
+        if not run_claude_skill(skill_file, ws, ctx.brand_dir, seed=seed if uses_seed else None):
+            return False
+        missing = [f for f in expected_files if not (ws / "editorial" / f).exists()]
+        if missing:
+            print_status(f"{name} finished but didn't write {', '.join(missing)} — not marking complete", "error")
+            return False
+        mark_substep_complete(ctx.content_dir, article, step, name)
+
+    approved = _read_editor_verdict(ws)
+    if approved is None:
+        print_status(f"editor-verdict.json missing or invalid after {step} review", "error")
+        return False
+
+    if not approved and revise_name not in done:
+        print_status("Editor requested a revision — running one revision pass", "info")
+        if not run_claude_skill(revise_skill, ws, ctx.brand_dir):
+            return False
+        mark_substep_complete(ctx.content_dir, article, step, revise_name)
+
+    return True
+
+
+def step_angle(ctx: RunContext, article: str) -> bool:
+    """Angle stage — SEO Manager, Writer, Reader Advocate, Editor as separate Claude sessions."""
+    return _run_substeps(
+        ctx, article, "angle", _ANGLE_SUBSTEPS,
+        draft_name="angle-writer-draft",
+        revise_name="angle-writer-revise", revise_skill="angle-writer-revise.md",
+        seed_prompt="  Your angle idea (Enter to let Claude analyse the SERP freely): ",
+    )
 
 
 def step_headline_outline(ctx: RunContext, article: str) -> bool:
-    ws = workspace(ctx.content_dir, article)
-    print()
-    seed = input("  Your headline idea (Enter for Claude's options): ").strip()
-    return run_claude_skill("headline-and-outline.md", ws, ctx.brand_dir, seed=seed or None)
+    """Outline stage — Writer, Editor, Reader Advocate as separate Claude sessions."""
+    return _run_substeps(
+        ctx, article, "headline-outline", _OUTLINE_SUBSTEPS,
+        draft_name="outline-writer-draft",
+        revise_name="outline-writer-revise", revise_skill="outline-writer-revise.md",
+        seed_prompt="  Your headline idea (Enter for Claude's options): ",
+    )
 
 
 def step_research(ctx: RunContext, article: str) -> bool:

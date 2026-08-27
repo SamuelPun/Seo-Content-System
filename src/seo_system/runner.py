@@ -72,7 +72,13 @@ def run_claude_skill(
         ["claude", "--print", "--dangerously-skip-permissions"],
         input=prompt,
         text=True,
-        cwd=str(Path.cwd()),
+        # ponytail: cwd is the workspace, not the orchestrator repo — Claude Code
+        # auto-loads CLAUDE.md from cwd for every session it starts, including
+        # --print subprocesses, so running from the orchestrator's own directory
+        # leaks its "drive everything through the CLI" instructions into the skill
+        # session and makes it role-play as a second orchestrator instead of doing
+        # its job. The workspace has no CLAUDE.md, so nothing leaks.
+        cwd=str(ws.resolve()),
     )
     if result.returncode != 0:
         print_status(f"Claude Code session failed (exit {result.returncode})", "error")

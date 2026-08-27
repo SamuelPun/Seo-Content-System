@@ -26,8 +26,15 @@ seo-content-system/
       qa.py                ← guided Q&A flow
 
   skills/                  ← Claude Code skill prompts (one per pipeline step)
-    keyword-and-angle.md
-    headline-and-outline.md
+    angle-seo-research.md      ← angle stage, role 1/4: SEO Manager
+    angle-writer-draft.md      ← angle stage, role 2/4: Writer
+    angle-reader-check.md      ← angle stage, role 3/4: Reader Advocate
+    angle-editor-review.md     ← angle stage, role 4/4: Editor
+    angle-writer-revise.md     ← angle stage, revision pass (conditional)
+    outline-writer-draft.md    ← outline stage, role 1/3: Writer
+    outline-editor-review.md   ← outline stage, role 2/3: Editor
+    outline-reader-check.md    ← outline stage, role 3/3: Reader Advocate
+    outline-writer-revise.md   ← outline stage, revision pass (conditional)
     research-authority.md
     writing.md
     polish.md
