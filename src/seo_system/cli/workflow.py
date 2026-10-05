@@ -15,13 +15,11 @@ import argparse
 import sys
 
 from seo_system.config import (
-    HUMAN_GATES,
     STEPS,
     get_content_base,
     load_client_market,
     normalise_slug,
 )
-from seo_system.gates import interactive_gate
 from seo_system.runner import print_status
 from seo_system.steps import STEP_RUNNERS, RunContext
 from seo_system.workspace import (
@@ -31,6 +29,7 @@ from seo_system.workspace import (
     log_step_end,
     log_step_start,
     mark_complete,
+    mark_needs_human,
     save_log,
     update_content_index,
     workspace,
@@ -48,6 +47,8 @@ def main():
                         help="Re-run step even if already marked complete")
     parser.add_argument("--keyword", default=None,
                         help="Target keyword — set once, skips the interactive prompt from then on")
+    parser.add_argument("--seed", default=None,
+                        help="Your angle/headline idea — passed to the stage's roles instead of prompting")
     args = parser.parse_args()
 
     content_base = get_content_base()
@@ -70,6 +71,7 @@ def main():
         brand_dir=brand_dir,
         market=load_client_market(client_dir),
         keyword=args.keyword,
+        seed=args.seed,
         force=args.force,
     )
 
@@ -114,20 +116,32 @@ def main():
         print_status(f"Starting step: {step.upper()}")
         log_step_start(ws, step)
 
-        success = STEP_RUNNERS[step](ctx, article)
+        result = STEP_RUNNERS[step](ctx, article)
 
-        if not success:
-            log_step_end(ws, step, "failed")
-            print_status(f"Step '{step}' failed. Fix the issue and re-run with --step {step} --force", "error")
+        if result.status == "usage_limit":
+            log_step_end(ws, step, "usage_limit", result.message)
+            print_status(f"{step} — stopped: {result.message}", "gate")
+            print_status(f"Nothing lost — just re-run the same command once the limit resets, "
+                         f"it resumes at the next unfinished role.", "info")
+            sys.exit(0)
+
+        if result.status == "failed":
+            log_step_end(ws, step, "failed", result.message)
+            detail = f": {result.message}" if result.message else "."
+            print_status(f"Step '{step}' failed{detail} Fix the issue and re-run with --step {step} --force", "error")
             sys.exit(1)
+
+        if result.status == "needs_human":
+            log_step_end(ws, step, "needs_human", result.message)
+            mark_needs_human(content_dir, article, step, result.message)
+            update_content_index(content_dir)
+            print_status(f"{step} — needs your input: {result.message}", "gate")
+            sys.exit(0)
 
         mark_complete(content_dir, article, step)
         log_step_end(ws, step, "complete")
         update_content_index(content_dir)
         print_status(f"{step} — done", "ok")
-
-        if step in HUMAN_GATES:
-            interactive_gate(step, ws)
 
     print()
     print_status(f"All done. Workspace: {ws.resolve()}", "ok")

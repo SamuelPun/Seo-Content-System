@@ -9,6 +9,7 @@ from seo_system.workspace import (
     load_log,
     log_path,
     mark_complete,
+    mark_needs_human,
     mark_pending,
     mark_substep_complete,
     reset_substeps,
@@ -91,6 +92,31 @@ def test_is_complete_true_after_mark(tmp_path):
 def test_is_complete_false_when_not_run(tmp_path):
     content_dir = make_content_dir(tmp_path)
     assert is_complete(content_dir, "article-a", "keyword") is False
+
+
+def test_mark_needs_human_sets_status_and_message(tmp_path):
+    content_dir = make_content_dir(tmp_path)
+    mark_needs_human(content_dir, "article-a", "angle", "Editor still rejected it")
+    log = load_log(content_dir, "article-a")
+    assert log["steps"]["angle"]["status"] == "needs_human"
+    assert log["steps"]["angle"]["message"] == "Editor still rejected it"
+
+
+def test_is_complete_false_when_needs_human(tmp_path):
+    """needs_human must not be treated as complete — a re-run without --force should
+    still hit the step again, not silently skip it."""
+    content_dir = make_content_dir(tmp_path)
+    mark_needs_human(content_dir, "article-a", "angle", "still rejected")
+    assert is_complete(content_dir, "article-a", "angle") is False
+
+
+def test_update_content_index_flags_needs_human_step(tmp_path):
+    content_dir = make_content_dir(tmp_path)
+    mark_complete(content_dir, "article-a", "keyword")
+    mark_needs_human(content_dir, "article-a", "angle", "still rejected")
+    update_content_index(content_dir)
+    index_text = (content_dir / "_index.md").read_text(encoding="utf-8")
+    assert "angle (needs human)" in index_text
 
 
 def test_mark_pending_resets_status(tmp_path):

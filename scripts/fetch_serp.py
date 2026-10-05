@@ -271,6 +271,18 @@ def run(keyword: str, country: str, top: int, out_dir: Path, api_key: str | None
     paa_path.write_text(json.dumps(paa, indent=2, ensure_ascii=False), encoding="utf-8")
     print(f"[OK]   {paa_path}")
 
+    # Record provenance separately (not inline in serp-urls.json — several scripts and
+    # skills already read that file as a bare list; a sidecar keeps this additive
+    # instead of changing a shape multiple consumers depend on). A DDG fallback run has
+    # no domain_rating/traffic/PAA data, which looks identical to a genuinely sparse
+    # Ahrefs result unless something records which one actually happened.
+    meta_path = out_dir / "serp-meta.json"
+    meta_path.write_text(
+        json.dumps({"keyword": keyword, "country": country, "source": source}, indent=2),
+        encoding="utf-8",
+    )
+    print(f"[OK]   {meta_path}")
+
     # Summary table
     print(f"\n=== SERP SUMMARY (source: {source}) ===")
     print(f"{'Pos':>3}  {'DR':>4}  {'Traffic':>8}  URL")

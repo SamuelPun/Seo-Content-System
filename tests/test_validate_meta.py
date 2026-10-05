@@ -2,10 +2,6 @@ import json
 from pathlib import Path
 
 from validate_meta import (
-    DESC_MAX,
-    DESC_MIN,
-    TITLE_MAX,
-    TITLE_MIN,
     extract_first_paragraph,
     extract_title,
     run,
@@ -62,7 +58,7 @@ def test_extract_first_paragraph_no_content():
 
 
 # ---------------------------------------------------------------------------
-# run — happy path and flag cases
+# run — extraction only; length/pass judgment lives in generate_checklist.py
 # ---------------------------------------------------------------------------
 
 def _make_draft(tmp_path: Path, title: str, body: str) -> Path:
@@ -76,55 +72,21 @@ def test_run_missing_draft(tmp_path):
 
 
 def test_run_writes_meta_json(tmp_path):
-    title = "A" * TITLE_MIN  # exactly at min
-    desc = "B" * DESC_MIN    # exactly at min
-    draft = _make_draft(tmp_path, title, desc)
+    draft = _make_draft(tmp_path, "A Reasonable Article Title", "A reasonably long description paragraph.")
     out = tmp_path / "out"
 
     assert run(draft, out) is True
     meta = json.loads((out / "meta.json").read_text())
-    assert meta["title"] == title
-    assert meta["passed"] is True
-    assert meta["flags"] == []
-
-
-def test_run_title_too_short(tmp_path):
-    draft = _make_draft(tmp_path, "Short", "B" * DESC_MIN)
-    meta = json.loads((tmp_path / "out" / "meta.json").read_text()) if False else None
-    run(draft, tmp_path / "out")
-    meta = json.loads((tmp_path / "out" / "meta.json").read_text())
-    assert any("Title too short" in f for f in meta["flags"])
-    assert meta["passed"] is False
-
-
-def test_run_title_too_long(tmp_path):
-    long_title = "W" * (TITLE_MAX + 1)
-    draft = _make_draft(tmp_path, long_title, "B" * DESC_MIN)
-    run(draft, tmp_path / "out")
-    meta = json.loads((tmp_path / "out" / "meta.json").read_text())
-    assert any("Title too long" in f for f in meta["flags"])
-
-
-def test_run_description_too_short(tmp_path):
-    title = "A" * TITLE_MIN
-    draft = _make_draft(tmp_path, title, "Too short.")
-    run(draft, tmp_path / "out")
-    meta = json.loads((tmp_path / "out" / "meta.json").read_text())
-    assert any("Description too short" in f for f in meta["flags"])
-
-
-def test_run_description_too_long(tmp_path):
-    title = "A" * TITLE_MIN
-    draft = _make_draft(tmp_path, title, "B" * (DESC_MAX + 1))
-    run(draft, tmp_path / "out")
-    meta = json.loads((tmp_path / "out" / "meta.json").read_text())
-    assert any("Description too long" in f for f in meta["flags"])
+    assert meta["title"] == "A Reasonable Article Title"
+    assert meta["description"] == "A reasonably long description paragraph."
+    assert "flags" not in meta
+    assert "passed" not in meta
 
 
 def test_run_override_title_and_description(tmp_path):
     draft = _make_draft(tmp_path, "Original Title", "Original body content.")
-    custom_title = "A" * TITLE_MIN
-    custom_desc = "B" * DESC_MIN
+    custom_title = "A Custom Override Title"
+    custom_desc = "A custom override description."
     run(draft, tmp_path / "out", title=custom_title, description=custom_desc)
     meta = json.loads((tmp_path / "out" / "meta.json").read_text())
     assert meta["title"] == custom_title
@@ -132,8 +94,18 @@ def test_run_override_title_and_description(tmp_path):
 
 
 def test_run_url_stored_in_meta(tmp_path):
-    title = "A" * TITLE_MIN
-    draft = _make_draft(tmp_path, title, "B" * DESC_MIN)
+    draft = _make_draft(tmp_path, "A Title", "A description paragraph here.")
     run(draft, tmp_path / "out", url="https://example.com/article/")
     meta = json.loads((tmp_path / "out" / "meta.json").read_text())
     assert meta["url"] == "https://example.com/article/"
+
+
+def test_run_preserves_existing_fields(tmp_path):
+    out = tmp_path / "out"
+    out.mkdir()
+    (out / "meta.json").write_text(json.dumps({"author": "Jane Doe"}), encoding="utf-8")
+    draft = _make_draft(tmp_path, "A Title", "A description paragraph here.")
+    run(draft, out)
+    meta = json.loads((out / "meta.json").read_text())
+    assert meta["author"] == "Jane Doe"
+    assert meta["title"] == "A Title"

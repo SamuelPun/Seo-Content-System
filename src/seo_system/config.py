@@ -39,10 +39,6 @@ STEPS = [
     "output",            # validate_meta + generate_schema + build_output + generate_checklist → final.html + publish-checklist.md
 ]
 
-# The CLI no longer blocks on its own terminal gate — angle/headline-outline/writing are
-# reviewed inline in chat by whoever is driving the pipeline instead (see CLAUDE.md).
-HUMAN_GATES: set[str] = set()
-
 # ---------------------------------------------------------------------------
 # Shared utilities
 # ---------------------------------------------------------------------------

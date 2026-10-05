@@ -26,7 +26,32 @@ class RunContext:
     brand_dir: Path
     market: str = "us"
     keyword: str | None = None  # supplied once via --keyword; skips the interactive prompt
+    seed: str | None = None  # --seed: your angle/headline idea, skips the interactive prompt
     force: bool = False
+
+
+@dataclass
+class StepResult:
+    """What a step_* function actually reports, distinct from whether its subprocess
+    chain merely exited 0. 'complete' is the only status that gets mark_complete()'d
+    and lets a re-run skip the step — 'needs_human' means the step ran fine but its
+    own success criteria weren't met (e.g. the Editor still hasn't approved after the
+    one revision pass) and a human has to look, not the code silently calling it done.
+    'usage_limit' means a Claude session hit a usage/rate limit — a plain re-run of
+    the same command resumes at the same checkpoint once the limit resets, nothing
+    was lost."""
+    status: str  # "complete" | "needs_human" | "failed" | "usage_limit"
+    message: str = ""
+
+    @property
+    def ok(self) -> bool:
+        return self.status == "complete"
+
+
+def _skill_failure(result) -> "StepResult":
+    """Turn a non-ok SkillRunResult into the matching StepResult status."""
+    status = "usage_limit" if result.status == "usage_limit" else "failed"
+    return StepResult(status, result.message)
 
 
 def _prompt(msg: str) -> str:
@@ -55,7 +80,7 @@ def get_keyword(ctx: RunContext, article: str) -> str:
     return kw
 
 
-def step_keyword(ctx: RunContext, article: str) -> bool:
+def step_keyword(ctx: RunContext, article: str) -> StepResult:
     ws = workspace(ctx.content_dir, article)
     kw = get_keyword(ctx, article)
 
@@ -67,21 +92,20 @@ def step_keyword(ctx: RunContext, article: str) -> bool:
 
     ok = run_script("fetch_serp.py", ["--keyword", kw, "--country", ctx.market, "--out-dir", str(data_dir)])
     if not ok:
-        return False
+        return StepResult("failed", "fetch_serp.py failed")
 
     if not serp_out.exists():
         print_status("serp-urls.json not found — cannot fetch SERP pages", "error")
-        return False
+        return StepResult("failed", "serp-urls.json not found")
 
-    with open(serp_out) as f:
-        serp_data = json.load(f)
-
-    urls = [entry.get("url") for entry in serp_data if entry.get("url")]
-    for i, url in enumerate(urls[:10], 1):
-        out_file = serp_pages_dir / f"{i}.md"
-        ok = run_script("fetch_url.py", ["--url", url, "--out", str(out_file)])
-        if not ok:
-            print_status(f"fetch_url failed for URL {i} — skipping (partial SERP data)", "error")
+    # Batch mode (not a loop of single-URL calls): one subprocess, and it applies the
+    # polite inter-request delay between competitor sites that a loop here would skip.
+    ok = run_script("fetch_url.py", [
+        "--urls",    str(serp_out),
+        "--out-dir", str(serp_pages_dir),
+    ])
+    if not ok:
+        print_status("fetch_url had failures — continuing with partial SERP data", "error")
 
     ok = run_script("summarise_serp_pages.py", [
         "--serp-pages-dir", str(serp_pages_dir),
@@ -89,9 +113,9 @@ def step_keyword(ctx: RunContext, article: str) -> bool:
     ])
     if not ok:
         print_status("summarise_serp_pages failed — serp-summaries.json not created", "error")
-        return False
+        return StepResult("failed", "summarise_serp_pages.py failed")
 
-    return True
+    return StepResult("complete")
 
 
 def _read_editor_verdict(ws: Path) -> bool | None:
@@ -111,7 +135,7 @@ def _read_editor_verdict(ws: Path) -> bool | None:
 # (checkpoint name, skill file, takes the seed, expected output files) — order matters,
 # each is a separate Claude session. Expected files are relative to editorial/.
 _ANGLE_SUBSTEPS = [
-    ("angle-seo-research", "angle-seo-research.md", False, ("research-brief.md",)),
+    ("angle-seo-research", "angle-seo-research.md", True, ("research-brief.md",)),
     ("angle-writer-draft", "angle-writer-draft.md", True, ("angle.md",)),
     ("angle-reader-check", "angle-reader-check.md", False, ("reader-feedback.md",)),
     ("angle-editor-review", "angle-editor-review.md", False, ("editor-verdict.json",)),
@@ -125,7 +149,7 @@ _OUTLINE_SUBSTEPS = [
 
 
 def _run_substeps(ctx: RunContext, article: str, step: str, substeps: list, draft_name: str,
-                   revise_name: str, revise_skill: str, seed_prompt: str) -> bool:
+                   revise_name: str, revise_skill: str, seed_prompt: str) -> StepResult:
     """Run a multi-role stage, checkpointing after each role so a re-run resumes at the next
     unfinished one instead of redoing the whole stage."""
     ws = workspace(ctx.content_dir, article)
@@ -133,37 +157,53 @@ def _run_substeps(ctx: RunContext, article: str, step: str, substeps: list, draf
         reset_substeps(ctx.content_dir, article, step)
     done = completed_substeps(ctx.content_dir, article, step)
 
-    seed = None
-    if draft_name not in done:
+    seed = ctx.seed
+    if not seed and draft_name not in done:
         print()
         seed = _prompt(seed_prompt) or None
 
     for name, skill_file, uses_seed, expected_files in substeps:
         if name in done:
             continue
-        if not run_claude_skill(skill_file, ws, ctx.brand_dir, seed=seed if uses_seed else None):
-            return False
+        skill_result = run_claude_skill(skill_file, ws, ctx.brand_dir, seed=seed if uses_seed else None)
+        if not skill_result.ok:
+            return _skill_failure(skill_result)
         missing = [f for f in expected_files if not (ws / "editorial" / f).exists()]
         if missing:
             print_status(f"{name} finished but didn't write {', '.join(missing)} — not marking complete", "error")
-            return False
+            return StepResult("failed", f"{name} didn't write {', '.join(missing)}")
         mark_substep_complete(ctx.content_dir, article, step, name)
 
     approved = _read_editor_verdict(ws)
     if approved is None:
         print_status(f"editor-verdict.json missing or invalid after {step} review", "error")
-        return False
+        return StepResult("failed", f"editor-verdict.json missing or invalid after {step} review")
 
     if not approved and revise_name not in done:
         print_status("Editor requested a revision — running one revision pass", "info")
-        if not run_claude_skill(revise_skill, ws, ctx.brand_dir):
-            return False
+        skill_result = run_claude_skill(revise_skill, ws, ctx.brand_dir)
+        if not skill_result.ok:
+            return _skill_failure(skill_result)
         mark_substep_complete(ctx.content_dir, article, step, revise_name)
+        # Re-read: the whole point of the revision pass is to earn approval. Don't take
+        # it on faith — a still-rejected draft after the one revision must not be marked
+        # complete (that's the bug that let a silently-abandoned angle slip through on
+        # teapot-hong-kong: the step exited 0 and log.json said "complete" regardless of
+        # what editor-verdict.json actually said).
+        approved = _read_editor_verdict(ws)
 
-    return True
+    if not approved:
+        return StepResult(
+            "needs_human",
+            f"Editor still hasn't approved {step} after the revision pass — "
+            f"read editorial/editor-verdict.json and the draft, then either fix it "
+            f"by hand or re-run with --force to redo the stage.",
+        )
+
+    return StepResult("complete")
 
 
-def step_angle(ctx: RunContext, article: str) -> bool:
+def step_angle(ctx: RunContext, article: str) -> StepResult:
     """Angle stage — SEO Manager, Writer, Reader Advocate, Editor as separate Claude sessions."""
     return _run_substeps(
         ctx, article, "angle", _ANGLE_SUBSTEPS,
@@ -173,7 +213,7 @@ def step_angle(ctx: RunContext, article: str) -> bool:
     )
 
 
-def step_headline_outline(ctx: RunContext, article: str) -> bool:
+def step_headline_outline(ctx: RunContext, article: str) -> StepResult:
     """Outline stage — Writer, Editor, Reader Advocate as separate Claude sessions."""
     return _run_substeps(
         ctx, article, "headline-outline", _OUTLINE_SUBSTEPS,
@@ -183,38 +223,38 @@ def step_headline_outline(ctx: RunContext, article: str) -> bool:
     )
 
 
-def step_research(ctx: RunContext, article: str) -> bool:
+def step_research(ctx: RunContext, article: str) -> StepResult:
     ws = workspace(ctx.content_dir, article)
     sources_dir = ws / "data" / "sources"
     sources_dir.mkdir(parents=True, exist_ok=True)
 
-    ok = run_claude_skill("research-authority.md", ws, ctx.brand_dir)
-    if not ok:
-        return False
+    skill_result = run_claude_skill("research-authority.md", ws, ctx.brand_dir)
+    if not skill_result.ok:
+        return _skill_failure(skill_result)
 
     index_path = sources_dir / "index.json"
     if not index_path.exists():
         print_status("Claude exited cleanly but data/sources/index.json was not written — research produced nothing", "error")
-        return False
+        return StepResult("failed", "data/sources/index.json was not written")
 
     try:
         index = json.loads(index_path.read_text(encoding="utf-8"))
         sources = index.get("sources", [])
         if not sources:
             print_status("data/sources/index.json exists but contains no sources — research produced nothing", "error")
-            return False
+            return StepResult("failed", "index.json contains no sources")
 
         missing = [s["id"] for s in sources if not (sources_dir / f"{s['id']}.md").exists()]
         if missing:
             print_status(f"index.json lists sources with no matching file: {', '.join(missing)}", "error")
-            return False
+            return StepResult("failed", f"index.json lists sources with no matching file: {', '.join(missing)}")
 
         print_status(f"sources verified: {len(sources)} source(s) in index, all files present", "ok")
     except (json.JSONDecodeError, Exception) as e:
         print_status(f"data/sources/index.json is not valid JSON: {e}", "error")
-        return False
+        return StepResult("failed", f"data/sources/index.json is not valid JSON: {e}")
 
-    return True
+    return StepResult("complete")
 
 
 def _validate_banned_phrases(ws: Path, data_dir: Path) -> bool:
@@ -277,18 +317,20 @@ def _seed_publisher_meta(ctx: RunContext, data_dir: Path, article: str) -> None:
     meta_path.write_text(json.dumps(existing, indent=2, ensure_ascii=False), encoding="utf-8")
 
 
-def step_writing(ctx: RunContext, article: str) -> bool:
+def step_writing(ctx: RunContext, article: str) -> StepResult:
     ws = workspace(ctx.content_dir, article)
     data_dir = ws / "data"
     data_dir.mkdir(parents=True, exist_ok=True)
 
-    ok = run_claude_skill("writing.md", ws, ctx.brand_dir)
-    if not ok:
-        return False
-    return _validate_banned_phrases(ws, data_dir)
+    skill_result = run_claude_skill("writing.md", ws, ctx.brand_dir)
+    if not skill_result.ok:
+        return _skill_failure(skill_result)
+    if not _validate_banned_phrases(ws, data_dir):
+        return StepResult("failed", "banned-phrase gate failed — see audit-flags.json")
+    return StepResult("complete")
 
 
-def step_polish(ctx: RunContext, article: str) -> bool:
+def step_polish(ctx: RunContext, article: str) -> StepResult:
     ws = workspace(ctx.content_dir, article)
     draft = ws / "editorial" / "draft.md"
     data_dir = ws / "data"
@@ -296,26 +338,27 @@ def step_polish(ctx: RunContext, article: str) -> bool:
 
     if not draft.exists():
         print_status("editorial/draft.md not found — run 'writing' step first", "error")
-        return False
+        return StepResult("failed", "editorial/draft.md not found")
 
     ok = run_script("scan_banned_phrases.py", ["--draft", str(draft), "--out-dir", str(data_dir)])
     if not ok:
         print_status("scan_banned_phrases failed — audit-flags.json not created", "error")
-        return False
+        return StepResult("failed", "scan_banned_phrases.py failed")
 
     ok = run_script("analyse_rhythm.py", ["--draft", str(draft), "--out-dir", str(data_dir)])
     if not ok:
         print_status("analyse_rhythm failed — rhythm-analysis.json not created", "error")
-        return False
+        return StepResult("failed", "analyse_rhythm.py failed")
 
-    ok = run_claude_skill("polish.md", ws, ctx.brand_dir)
-    if not ok:
-        return False
-    return _validate_banned_phrases(ws, data_dir)
+    skill_result = run_claude_skill("polish.md", ws, ctx.brand_dir)
+    if not skill_result.ok:
+        return _skill_failure(skill_result)
+    if not _validate_banned_phrases(ws, data_dir):
+        return StepResult("failed", "banned-phrase gate failed — see audit-flags.json")
+    return StepResult("complete")
 
 
-
-def step_output(ctx: RunContext, article: str) -> bool:
+def step_output(ctx: RunContext, article: str) -> StepResult:
     ws = workspace(ctx.content_dir, article)
     draft = ws / "editorial" / "draft.md"
     data_dir = ws / "data"
@@ -325,12 +368,12 @@ def step_output(ctx: RunContext, article: str) -> bool:
 
     if not draft.exists():
         print_status("editorial/draft.md not found", "error")
-        return False
+        return StepResult("failed", "editorial/draft.md not found")
 
     _seed_publisher_meta(ctx, data_dir, article)
     ok = run_script("validate_meta.py", ["--draft", str(draft), "--out-dir", str(data_dir)])
     if not ok:
-        return False
+        return StepResult("failed", "validate_meta.py failed")
 
     ok = run_script("generate_schema.py", [
         "--draft", str(draft),
@@ -338,13 +381,17 @@ def step_output(ctx: RunContext, article: str) -> bool:
         "--out-dir", str(data_dir),
     ])
     if not ok:
-        return False
+        return StepResult("failed", "generate_schema.py failed")
 
     ok = run_script("build_output.py", ["--workspace", str(ws)])
     if not ok:
-        return False
+        return StepResult("failed", "build_output.py failed")
 
-    return run_script("generate_checklist.py", ["--workspace", str(ws)])
+    ok = run_script("generate_checklist.py", ["--workspace", str(ws)])
+    if not ok:
+        return StepResult("failed", "generate_checklist.py failed")
+
+    return StepResult("complete")
 
 
 STEP_RUNNERS: dict[str, callable] = {

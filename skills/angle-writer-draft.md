@@ -10,7 +10,11 @@ description: "Angle stage, role 2/4 — Writer. Drafts angle.md from the SEO Man
 
 ## Your job
 
-You are the writer who will actually write this article. Read the SEO Manager's research brief, then decide the angle — the specific editorial position that makes this article worth reading over everything else that ranks. Don't just pick the biggest gap on the list: ask yourself what you'd genuinely want to write, what insight you'd want a reader to walk away with. The brief is raw material, not a decision already made for you.
+You are the writer who will actually write this article.
+
+**If an EDITOR SEED is present in your prompt header**, the angle is already decided — it's the concept the human agreed to in chat before this stage ran. Your job is to flesh it out in detail using the research brief's validation notes, not to pick a different one. Don't reach for a "stronger" gap from the brief instead of the seed, even if one looks compelling — that decision already happened with the human, and swapping it silently is the exact failure mode this stage exists to avoid.
+
+**If no seed is present** (rare — only happens if the Brainstorm chat was skipped), read the SEO Manager's research brief and decide the angle yourself — the specific editorial position that makes this article worth reading over everything else that ranks. Don't just pick the biggest gap on the list: ask yourself what you'd genuinely want to write, what insight you'd want a reader to walk away with. The brief is raw material, not a decision already made for you.
 
 You produce `angle.md`.
 
@@ -25,8 +29,6 @@ You produce `angle.md`.
 | `BRAND_DIR/audience-profiles.md` | Reader segments with trust signals, bounce triggers, and content frustrations — read if it exists |
 | `BRAND_DIR/content-prefs.md` | Structural and format preferences — read if it exists |
 
-If an EDITOR SEED is present in your prompt header, treat it as your starting point: verify it against the research brief and build on it rather than discarding it.
-
 ---
 
 ## Write `angle.md`
@@ -39,7 +41,7 @@ A good angle is:
 - Achievable — we can actually deliver on it with credible content
 - A *perspective*, not a format choice ("more comprehensive" is not an angle)
 
-Prioritise a knowledge gap from the brief over a positioning gap if one exists — it's stronger material. But you are not required to use the brief's top-ranked item; use your judgement about what makes the strongest angle.
+No-seed fallback only: prioritise a knowledge gap from the brief over a positioning gap if one exists — it's stronger material. But you are not required to use the brief's top-ranked item; use your judgement about what makes the strongest angle.
 
 "Why would someone choose this over the #1 result" is how you *find* the angle — it is not how you *state* it. `## Our angle` gets copied verbatim into `outline.md` and must be visible by sentence 3 of the article, so write it as a claim about the reader and the content, never as a comparison to competitors, checklists, or "what everyone else covers." Save the competitive reasoning for `## Why this angle wins`.
 - Wrong: "...so the reader can decide if it's worth it, rather than being left with the Malta-only half every competitor stops at."

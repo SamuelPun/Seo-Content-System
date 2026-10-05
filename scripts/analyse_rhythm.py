@@ -84,8 +84,10 @@ def run(draft_path, out_dir):
         "distribution":     distribution,
         "uniform_runs":     uniform_runs[:10],  # cap at 10 for readability
         "flags": {
+            # em dash policy lives once, in scan_banned_phrases.py (HIGH severity,
+            # hard gate) — polish.md already reads em_dash_count above directly
+            # rather than a redundant flag here, so this doesn't re-declare it.
             "low_burstiness":    burst < 0.4,
-            "em_dash_overuse":   em_dash_count > 0,
             "no_short_sentences": distribution["1_to_10"] == 0,
         }
     }
@@ -98,7 +100,7 @@ def run(draft_path, out_dir):
     print(f"  Mean length:    {result['mean_length']} words")
     print(f"  Range:          {result['min_length']}–{result['max_length']} words")
     print(f"  Burstiness:     {result['burstiness_score']}  {'⚠ LOW — uniform rhythm' if result['flags']['low_burstiness'] else '✓ OK'}")
-    print(f"  Em dashes:      {result['em_dash_count']}  {'⚠ OVERUSE' if result['flags']['em_dash_overuse'] else '✓ OK'}")
+    print(f"  Em dashes:      {result['em_dash_count']}  {'⚠ must be zero' if result['em_dash_count'] > 0 else '✓ OK'}")
     print(f"  Short sentences (≤10w): {distribution['1_to_10']}  {'⚠ NONE — add short sentences' if result['flags']['no_short_sentences'] else '✓ OK'}")
     if uniform_runs:
         print(f"  Uniform runs:   {len(result['uniform_runs'])} sequence(s) of similar-length sentences")

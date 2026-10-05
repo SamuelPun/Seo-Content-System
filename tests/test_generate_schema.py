@@ -171,6 +171,46 @@ def test_run_missing_draft(tmp_path):
     assert run(tmp_path / "missing.md", None, tmp_path / "out") is False
 
 
+def test_run_preserves_date_published_across_reruns(tmp_path, monkeypatch):
+    """Regression test: regenerating output (e.g. after fixing a typo) must move
+    dateModified forward but never rewrite the original datePublished to today."""
+    draft = tmp_path / "draft.md"
+    draft.write_text("# My Article\n\n## Overview\n\nContent.", encoding="utf-8")
+    meta_path = tmp_path / "meta.json"
+    meta_path.write_text(json.dumps({"url": "https://example.com/"}), encoding="utf-8")
+    out = tmp_path / "out"
+
+    import generate_schema
+
+    class _FixedDate:
+        def __init__(self, iso):
+            self._iso = iso
+
+        def isoformat(self):
+            return self._iso
+
+    class _FakeDateModule:
+        def __init__(self, iso):
+            self._iso = iso
+
+        def today(self):
+            return _FixedDate(self._iso)
+
+    monkeypatch.setattr(generate_schema, "date", _FakeDateModule("2026-01-01"))
+    assert run(draft, meta_path, out) is True
+    first = json.loads((out / "schema.json").read_text())[0]
+    assert first["datePublished"] == "2026-01-01"
+    assert first["dateModified"] == "2026-01-01"
+    assert json.loads(meta_path.read_text())["date_first_published"] == "2026-01-01"
+
+    # Re-run later, as if fixing a typo and regenerating output.
+    monkeypatch.setattr(generate_schema, "date", _FakeDateModule("2026-03-15"))
+    assert run(draft, meta_path, out) is True
+    second = json.loads((out / "schema.json").read_text())[0]
+    assert second["datePublished"] == "2026-01-01"   # unchanged
+    assert second["dateModified"] == "2026-03-15"     # moved forward
+
+
 def test_run_article_schema(tmp_path):
     draft = tmp_path / "draft.md"
     draft.write_text("# My Article\n\n## Overview\n\nContent.", encoding="utf-8")

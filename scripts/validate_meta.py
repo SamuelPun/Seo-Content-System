@@ -4,11 +4,6 @@ import re
 import sys
 from pathlib import Path
 
-TITLE_MIN = 30
-TITLE_MAX = 60
-DESC_MIN  = 100
-DESC_MAX  = 160
-
 
 def extract_title(text):
     match = re.search(r'^#\s+(.+)$', text, re.MULTILINE)
@@ -33,6 +28,14 @@ def extract_first_paragraph(text):
 
 
 def run(draft_path, out_dir, title=None, description=None, url=None):
+    """Extract title/description from the draft and write meta.json.
+
+    This is extraction only — it does not judge length. generate_checklist.py
+    (run later, in the output step) is the single place that decides what's
+    good enough to publish. Keeping the judgment in one place means there's
+    only one set of thresholds to keep correct, instead of two that can quietly
+    drift out of sync with each other.
+    """
     if not draft_path.exists():
         print(f"ERROR: Draft not found: {draft_path}", file=sys.stderr)
         return False
@@ -46,19 +49,6 @@ def run(draft_path, out_dir, title=None, description=None, url=None):
     if not description:
         description = extract_frontmatter_description(text) or extract_first_paragraph(text) or ""
 
-    title_len = len(title)
-    desc_len  = len(description)
-
-    flags = []
-    if title_len < TITLE_MIN:
-        flags.append(f"Title too short ({title_len} chars, min {TITLE_MIN})")
-    if title_len > TITLE_MAX:
-        flags.append(f"Title too long ({title_len} chars, max {TITLE_MAX})")
-    if desc_len < DESC_MIN:
-        flags.append(f"Description too short ({desc_len} chars, min {DESC_MIN})")
-    if desc_len > DESC_MAX:
-        flags.append(f"Description too long ({desc_len} chars, max {DESC_MAX})")
-
     out_path = out_dir / "meta.json"
     # Preserve any extra fields (e.g. author) already in meta.json
     existing = {}
@@ -69,25 +59,14 @@ def run(draft_path, out_dir, title=None, description=None, url=None):
             pass
     meta = {
         **existing,
-        "title":            title,
-        "title_length":     title_len,
-        "description":      description,
-        "description_length": desc_len,
-        "url":              url or existing.get("url", ""),
-        "flags":            flags,
-        "passed":           len(flags) == 0,
+        "title":       title,
+        "description": description,
+        "url":         url or existing.get("url", ""),
     }
     out_path.write_text(json.dumps(meta, indent=2, ensure_ascii=False), encoding="utf-8")
     print(f"[OK]   {out_path}")
-    print("\n=== META VALIDATION ===")
-    print(f"  Title ({title_len} chars): {title[:70]}")
-    print(f"  Desc  ({desc_len} chars): {description[:80]}...")
-    if flags:
-        print("\n  ⚠ FLAGS:")
-        for f in flags:
-            print(f"    - {f}")
-    else:
-        print("\n  ✓ All checks passed")
+    print(f"  Title ({len(title)} chars): {title[:70]}")
+    print(f"  Desc  ({len(description)} chars): {description[:80]}...")
     return True
 
 

@@ -56,7 +56,7 @@ Write to `EDITORIAL_DIR/editor-verdict.json`:
 
 If `approved` is `false`, `notes` must be specific enough for the Writer to act on without re-reading everything from scratch — name the exact line or section that needs to change and what's wrong with it.
 
-Do not fail the angle over stylistic preference. Fail it only for: insight test failure, ignoring a clearly stronger knowledge gap without reason, or a reader-trust concern that would plausibly lose the reader.
+Do not fail the angle over stylistic preference. Fail it only for: insight test failure, ignoring a clearly stronger knowledge gap without reason, or a reader-trust concern that would plausibly lose the reader. If the angle is built on an EDITOR SEED (an agreed concept from the chat brainstorm), don't fail it for "not the strongest possible gap" — that tradeoff was already made with the human. You're grading execution, not re-litigating direction.
 
 ---
 

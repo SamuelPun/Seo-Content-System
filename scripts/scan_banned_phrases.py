@@ -42,10 +42,10 @@ BANNED = [
     ("at its core", "HIGH"),
     ("moving forward", "HIGH"),
     ("going forward", "HIGH"),
+    # Consultant-jargon / AI-cluster vocabulary — genuinely rare in ordinary human
+    # writing about mundane topics, disproportionately common in AI-generated
+    # marketing copy. Kept at MEDIUM.
     ("comprehensive", "MEDIUM"),
-    ("crucial", "MEDIUM"),
-    ("vital", "MEDIUM"),
-    ("pivotal", "MEDIUM"),
     ("robust", "MEDIUM"),
     ("innovative", "MEDIUM"),
     ("dynamic", "MEDIUM"),
@@ -66,25 +66,11 @@ BANNED = [
     ("captivating", "MEDIUM"),
     ("burgeoning", "MEDIUM"),
     ("esteemed", "MEDIUM"),
-    ("fundamental", "MEDIUM"),
-    ("essential", "MEDIUM"),
-    ("notable", "MEDIUM"),
-    ("significant", "MEDIUM"),
-    ("considerable", "MEDIUM"),
-    ("navigate", "MEDIUM"),
-    ("optimize", "MEDIUM"),
-    ("maximise", "MEDIUM"),
-    ("maximize", "MEDIUM"),
     ("amplify", "MEDIUM"),
-    ("enhance", "MEDIUM"),
-    ("enable", "MEDIUM"),
     ("bolster", "MEDIUM"),
     ("augment", "MEDIUM"),
     ("illuminate", "MEDIUM"),
     ("unpack", "MEDIUM"),
-    ("explore", "MEDIUM"),
-    ("craft", "MEDIUM"),
-    ("drive", "MEDIUM"),
     ("landscape", "MEDIUM"),
     ("realm", "MEDIUM"),
     ("ecosystem", "MEDIUM"),
@@ -98,24 +84,21 @@ BANNED = [
     ("deliverables", "MEDIUM"),
     ("stakeholders", "MEDIUM"),
     ("trajectory", "MEDIUM"),
-    ("journey", "MEDIUM"),
-    ("furthermore", "MEDIUM"),
-    ("moreover", "MEDIUM"),
-    ("additionally", "MEDIUM"),
-    ("consequently", "MEDIUM"),
-    ("accordingly", "MEDIUM"),
-    ("nevertheless", "MEDIUM"),
     ("notwithstanding", "MEDIUM"),
     ("herein", "MEDIUM"),
     ("heretofore", "MEDIUM"),
-    ("hence", "MEDIUM"),
-    ("as such", "MEDIUM"),
     ("in essence", "MEDIUM"),
-    ("in summary", "MEDIUM"),
-    ("in conclusion", "MEDIUM"),
-    ("when it comes to", "MEDIUM"),
     ("whether you're a beginner or an expert", "MEDIUM"),
     ("in light of this", "MEDIUM"),
+    # Removed from this list on review: essential, significant, crucial, vital,
+    # pivotal, fundamental, notable, considerable, enable, enhance, drive, craft,
+    # explore, navigate, optimize, maximise/maximize, furthermore, moreover,
+    # additionally, consequently, accordingly, nevertheless, hence, as such, in
+    # summary, in conclusion, when it comes to, journey. These are ordinary
+    # workhorse words and formal connectives used constantly in normal human
+    # writing (news, textbooks, this tool's own SEO-content domain) — not a
+    # distinctive AI tell, just noise that gets "corrected" out of otherwise fine
+    # prose during polish.
 ]
 
 BANNED_SORTED = sorted(BANNED, key=lambda x: len(x[0]), reverse=True)

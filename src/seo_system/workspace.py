@@ -6,6 +6,7 @@ All functions take content_dir as an explicit first parameter (no globals).
 from __future__ import annotations
 
 import json
+import os
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -20,6 +21,17 @@ def log_path(content_dir: Path, article: str) -> Path:
     return workspace(content_dir, article) / "data" / "log.json"
 
 
+def _atomic_write_json(path: Path, data: dict):
+    """Write JSON via a temp file + os.replace so a kill mid-write (usage-limit cutoff,
+    crash) can never leave log.json half-written and unparseable — resumability depends
+    on this file always being intact for the next run to read."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_name(f"{path.name}.tmp{os.getpid()}")
+    with open(tmp, "w") as f:
+        json.dump(data, f, indent=2)
+    tmp.replace(path)  # atomic on POSIX and Windows (Python 3.3+)
+
+
 def load_log(content_dir: Path, article: str) -> dict:
     p = log_path(content_dir, article)
     if p.exists():
@@ -29,9 +41,7 @@ def load_log(content_dir: Path, article: str) -> dict:
 
 
 def save_log(content_dir: Path, article: str, log: dict):
-    log_path(content_dir, article).parent.mkdir(parents=True, exist_ok=True)
-    with open(log_path(content_dir, article), "w") as f:
-        json.dump(log, f, indent=2)
+    _atomic_write_json(log_path(content_dir, article), log)
 
 
 def mark_complete(content_dir: Path, article: str, step: str):
@@ -39,6 +49,20 @@ def mark_complete(content_dir: Path, article: str, step: str):
     log["steps"][step] = {
         "status": "complete",
         "completed_at": datetime.now(timezone.utc).isoformat(),
+    }
+    save_log(content_dir, article, log)
+
+
+def mark_needs_human(content_dir: Path, article: str, step: str, message: str = ""):
+    """The step ran to completion but its own success criteria weren't met (e.g. the
+    Editor still hasn't approved after the one revision pass) — distinct from both
+    'complete' (don't re-skip it) and 'failed' (it's not a crash, it's a real editorial
+    outcome a human needs to weigh in on)."""
+    log = load_log(content_dir, article)
+    log["steps"][step] = {
+        "status": "needs_human",
+        "message": message,
+        "updated_at": datetime.now(timezone.utc).isoformat(),
     }
     save_log(content_dir, article, log)
 
@@ -99,8 +123,12 @@ def update_content_index(content_dir: Path):
             continue
         keyword = data.get("display_name", article_dir.name)
         steps = data.get("steps", {})
+        blocked = next((s for s in STEPS if steps.get(s, {}).get("status") == "needs_human"), None)
         completed = [s for s in STEPS if steps.get(s, {}).get("status") == "complete"]
-        status = completed[-1] if completed else "pending"
+        if blocked:
+            status = f"{blocked} (needs human)"
+        else:
+            status = completed[-1] if completed else "pending"
         last_edit = datetime.fromtimestamp(log_file.stat().st_mtime).strftime("%Y-%m-%d")
         rows.append(f"| {keyword} | {status} | {last_edit} |")
 

@@ -31,14 +31,15 @@ def detect_type(text):
     return "Article"
 
 
-def build_article_schema(title, url, date_str, author=None, description=None, publisher_name=None, publisher_url=None):
+def build_article_schema(title, url, date_published, author=None, description=None,
+                          publisher_name=None, publisher_url=None, date_modified=None):
     schema = {
         "@context": "https://schema.org",
         "@type": "Article",
         "headline": title,
         "url": url,
-        "datePublished": date_str,
-        "dateModified": date_str,
+        "datePublished": date_published,
+        "dateModified": date_modified or date_published,
         "publisher": {
             "@type": "Organization",
             "name": publisher_name or "",
@@ -109,7 +110,7 @@ def run(draft_path, meta_path, out_dir, url=None):
     out_dir.mkdir(parents=True, exist_ok=True)
     text = draft_path.read_text(encoding="utf-8")
     title = extract_title(text) or "Untitled"
-    date_str = date.today().isoformat()
+    today_str = date.today().isoformat()
 
     # Get URL, author, description, publisher from meta.json if available
     page_url = url
@@ -117,6 +118,7 @@ def run(draft_path, meta_path, out_dir, url=None):
     meta_description = None
     meta_publisher_name = None
     meta_publisher_url = None
+    meta = {}
     if meta_path and meta_path.exists():
         meta = json.loads(meta_path.read_text(encoding="utf-8"))
         page_url = page_url or meta.get("url")
@@ -127,13 +129,25 @@ def run(draft_path, meta_path, out_dir, url=None):
     if not page_url:
         page_url = f"{meta_publisher_url or ''}/blog/placeholder-url/"
 
+    # datePublished must stay fixed once set — re-running `output` (e.g. to fix a typo
+    # and regenerate) should only ever move dateModified forward, not silently rewrite
+    # the original publish date to today. Persisted in meta.json, which validate_meta.py
+    # (run just before this in the output step) already preserves unknown fields on.
+    date_published = meta.get("date_first_published") or today_str
+    if meta_path and not meta.get("date_first_published"):
+        meta["date_first_published"] = date_published
+        meta_path.write_text(json.dumps(meta, indent=2, ensure_ascii=False), encoding="utf-8")
+
     schema_type = detect_type(text)
     print(f"[INFO] Detected schema type: {schema_type}")
 
     schemas = []
 
     # Always include Article schema
-    schemas.append(build_article_schema(title, page_url, date_str, meta_author, meta_description, meta_publisher_name, meta_publisher_url))
+    schemas.append(build_article_schema(
+        title, page_url, date_published, meta_author, meta_description,
+        meta_publisher_name, meta_publisher_url, date_modified=today_str,
+    ))
 
     # Add FAQ or HowTo if detected
     if schema_type == "FAQPage":
